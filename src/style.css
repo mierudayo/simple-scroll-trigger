@@ -9,4 +9,13 @@
 .trigger {
   background-color: pink;
   height: 1000px;
+  position: relative;
+}
+
+.marker {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  width: 45px;
+  border-bottom: 1px solid red;
 }
