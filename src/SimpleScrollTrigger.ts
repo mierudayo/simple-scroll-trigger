@@ -1,10 +1,10 @@
 export class SimpleScrollTrigger {
-  constructor(trigger: HTMLElement, onEnter: () => void) {
+  constructor(trigger: Element, onEnter: () => void) {
     this.triggerElemet = trigger;
     this.observer.observe(this.triggerElemet);
     this.onEnterCallback = onEnter;
   }
-  private triggerElemet: HTMLElement;
+  private triggerElemet: Element;
 
   private onEnterCallback: () => void;
 
@@ -14,6 +14,6 @@ export class SimpleScrollTrigger {
 
   observer = new IntersectionObserver(this.callback, {
     rootMargin: "",
-    threshold: 0,
+    threshold: [0,0.01,0.02,0.03,0.04,0.05,0.1,0.2,],
   });
 }
