@@ -1,0 +1,21 @@
+{
+  "name": "simple",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "format": "eslint src/**/*.ts --fix && prettier src/**/*.{ts,html,css} --write"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "5.44.0",
+    "@typescript-eslint/parser": "5.44.0",
+    "eslint": "8.28.0",
+    "eslint-config-prettier": "8.5.0",
+    "prettier": "2.8.0",
+    "typescript": "4.6.4",
+    "vite": "3.2.3"
+  }
+}
