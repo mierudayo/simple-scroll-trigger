@@ -1,8 +1,13 @@
 type Options = {
   trigger: Element;
   onEnter: () => void;
-  startViewPortPoint?: number;
-  startTriggerPoint?: number;
+  startViewPortPoint?: number | PointOption;
+  startTriggerPoint?: number | PointOption;
+};
+
+type PointOption = {
+  value: number;
+  unit: "px" | "%";
 };
 export class SimpleScrollTrigger {
   private triggerElemet: Element;
@@ -25,11 +30,41 @@ export class SimpleScrollTrigger {
     this.onEnterCallback = onEnter;
 
     this.startViewPortPoint =
-      startViewPortPoint === undefined ? 0 : startViewPortPoint;
-    this.startTriggerPoint =
-      startTriggerPoint === undefined ? 0 : startTriggerPoint;
+      this._convertPxViewPortPointOption(startViewPortPoint);
+    this.startTriggerPoint = this._convertPxTargetointOption(startTriggerPoint);
     console.log(startTriggerPoint, this.startTriggerPoint);
     this.setupObserver();
+  }
+
+  private _convertPxViewPortPointOption(
+    arg: number | PointOption | undefined
+  ): number {
+    const windowHeight = window.innerHeight;
+
+    if (arg === undefined) {
+      return windowHeight;
+    }
+    if (typeof arg === "number") {
+      return windowHeight - arg;
+    }
+    if (arg.unit === "px") {
+      return windowHeight - arg.value;
+    }
+    return (windowHeight * (100 - arg.value)) / 100;
+  }
+
+  private _convertPxTargetointOption(arg: number | PointOption | undefined) {
+    const targetElementHeight = this.triggerElemet.clientHeight;
+    if (arg === undefined) {
+      return 0;
+    }
+    if (typeof arg === "number") {
+      return arg;
+    }
+    if (arg.unit === "px") {
+      return arg.value;
+    }
+    return (targetElementHeight * arg.value) / 100;
   }
 
   private setupObserver() {
@@ -41,37 +76,24 @@ export class SimpleScrollTrigger {
     // for (let i = 1; i < 10; i++) {
     //   threshold.push(0.99 + i / 1000);
     // }
-    const windowHeight = window.innerHeight;
-    const targetElementHeight = this.triggerElemet.clientHeight;
-
-    const targetPointFromTop =
-      (targetElementHeight * this.startTriggerPoint) / 100;
-    const viewPortPointFromTop =
-      (windowHeight * (100 - this.startViewPortPoint)) / 100;
-
     const callback = (entries: IntersectionObserverEntry[]) => {
       console.log(
         entries[0].intersectionRatio,
         entries[0].rootBounds!.y - entries[0].boundingClientRect.y
       );
-      // if(entries[0].intersectionRatio > 0.9){
-      //   console.log("over 90")
-      // }
       if (entries[0].isIntersecting) {
         this.onEnterCallback();
       }
     };
 
     console.log(
-      targetPointFromTop,
-      viewPortPointFromTop,
-      `${targetPointFromTop + viewPortPointFromTop}px 0px ${-(
-        targetPointFromTop + viewPortPointFromTop
+      `${this.startTriggerPoint + this.startViewPortPoint}px 0px ${-(
+        this.startTriggerPoint + this.startViewPortPoint
       )}px`
     );
     this.observer = new IntersectionObserver(callback, {
-      rootMargin: `${targetPointFromTop + viewPortPointFromTop}px 0px ${-(
-        targetPointFromTop + viewPortPointFromTop
+      rootMargin: `${this.startTriggerPoint + this.startViewPortPoint}px 0px ${-(
+        this.startTriggerPoint + this.startViewPortPoint
       )}px`,
       threshold: threshold,
     });

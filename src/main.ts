@@ -7,7 +7,7 @@ if (trigger) {
     onEnter: () => {
       console.log("onEnter");
     },
-    startViewPortPoint: 50,
-    startTriggerPoint: 0,
+    startViewPortPoint: { value: 0, unit: "%" },
+    startTriggerPoint: { value: 500, unit: "px" },
   });
 }
