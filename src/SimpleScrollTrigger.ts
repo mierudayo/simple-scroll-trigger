@@ -12,7 +12,9 @@ export class SimpleScrollTrigger {
   private observer: IntersectionObserver | null = null;
 
   private startViewPortPoint: number;
+
   private startTriggerPoint: number;
+
   constructor({
     trigger,
     onEnter,
@@ -30,33 +32,47 @@ export class SimpleScrollTrigger {
     this.setupObserver();
   }
 
-  setupObserver() {
+  private setupObserver() {
     // 閾値の配列作成
-    const threshold = [0];
-    for (let i = 1; i < 100; i++) {
-      threshold.push(i / 100);
-    }
-
+    const threshold = [0, 1];
+    // for (let i = 1; i < 100; i++) {
+    //   threshold.push(i / 100);
+    // }
+    // for (let i = 1; i < 10; i++) {
+    //   threshold.push(0.99 + i / 1000);
+    // }
     const windowHeight = window.innerHeight;
     const targetElementHeight = this.triggerElemet.clientHeight;
 
-    const heightDiff = targetElementHeight - windowHeight;
-    const bottomMargin =
-      -(windowHeight * (100 - this.startViewPortPoint)) / 100;
+    const targetPointFromTop =
+      (targetElementHeight * this.startTriggerPoint) / 100;
+    const viewPortPointFromTop =
+      (windowHeight * (100 - this.startViewPortPoint)) / 100;
 
     const callback = (entries: IntersectionObserverEntry[]) => {
-      console.log(entries[0].intersectionRatio);
-      if (
-        entries[0].isIntersecting &&
-        entries[0].intersectionRatio >= this.startTriggerPoint / 100
-      ) {
+      console.log(
+        entries[0].intersectionRatio,
+        entries[0].rootBounds!.y - entries[0].boundingClientRect.y
+      );
+      // if(entries[0].intersectionRatio > 0.9){
+      //   console.log("over 90")
+      // }
+      if (entries[0].isIntersecting) {
         this.onEnterCallback();
       }
     };
 
-    console.log(`${heightDiff - bottomMargin}px 0px ${bottomMargin}px`);
+    console.log(
+      targetPointFromTop,
+      viewPortPointFromTop,
+      `${targetPointFromTop + viewPortPointFromTop}px 0px ${-(
+        targetPointFromTop + viewPortPointFromTop
+      )}px`
+    );
     this.observer = new IntersectionObserver(callback, {
-      rootMargin: `${heightDiff - bottomMargin}px 0px ${bottomMargin}px`,
+      rootMargin: `${targetPointFromTop + viewPortPointFromTop}px 0px ${-(
+        targetPointFromTop + viewPortPointFromTop
+      )}px`,
       threshold: threshold,
     });
 

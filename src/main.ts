@@ -7,7 +7,7 @@ if (trigger) {
     onEnter: () => {
       console.log("onEnter");
     },
-    startViewPortPoint: 100,
-    startTriggerPoint: 99,
+    startViewPortPoint: 50,
+    startTriggerPoint: 0,
   });
 }
