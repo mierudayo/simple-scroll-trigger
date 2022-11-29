@@ -92,9 +92,9 @@ export class SimpleScrollTrigger {
       )}px`
     );
     this.observer = new IntersectionObserver(callback, {
-      rootMargin: `${this.startTriggerPoint + this.startViewPortPoint}px 0px ${-(
+      rootMargin: `${
         this.startTriggerPoint + this.startViewPortPoint
-      )}px`,
+      }px 0px ${-(this.startTriggerPoint + this.startViewPortPoint)}px`,
       threshold: threshold,
     });
 
