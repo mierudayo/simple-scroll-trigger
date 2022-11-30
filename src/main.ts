@@ -7,7 +7,10 @@ if (trigger) {
     onEnter: () => {
       console.log("onEnter");
     },
+    onLeaveBack: () => {
+      console.log("onLeaveBack");
+    },
     startViewPortPoint: { value: 0, unit: "%" },
-    startTriggerPoint: { value: 500, unit: "px" },
+    startTriggerPoint: { value: 0, unit: "px" },
   });
 }

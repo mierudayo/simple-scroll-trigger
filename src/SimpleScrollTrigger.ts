@@ -1,6 +1,7 @@
 type Options = {
   trigger: Element;
-  onEnter: () => void;
+  onEnter?: () => void;
+  onLeaveBack?: () => void;
   startViewPortPoint?: number | PointOption;
   startTriggerPoint?: number | PointOption;
 };
@@ -12,7 +13,8 @@ type PointOption = {
 export class SimpleScrollTrigger {
   #triggerElemet: Element;
 
-  #onEnterCallback: () => void;
+  #onEnterCallback: (() => void) | undefined;
+  #onLeaveBackCallback: (() => void) | undefined;
 
   #observer: IntersectionObserver | null = null;
 
@@ -22,14 +24,18 @@ export class SimpleScrollTrigger {
 
   #resizeFlag = false;
 
+  #isEnterd = false;
+
   constructor({
     trigger,
     onEnter,
+    onLeaveBack,
     startViewPortPoint,
     startTriggerPoint,
   }: Options) {
     this.#triggerElemet = trigger;
     this.#onEnterCallback = onEnter;
+    this.#onLeaveBackCallback = onLeaveBack;
 
     this.#startViewPortPoint = startViewPortPoint ?? 0;
     this.#startTriggerPoint = startTriggerPoint ?? 0;
@@ -95,7 +101,18 @@ export class SimpleScrollTrigger {
       const rectY =
         (entries[0].rootBounds?.y ?? 0) - entries[0].boundingClientRect.y;
       if (entries[0].isIntersecting && rectY < 0) {
-        this.#onEnterCallback();
+        // 初めて入ったときに入域済みフラグをたてる
+        if (!this.#isEnterd) {
+          this.#isEnterd = true;
+        }
+        if (this.#onEnterCallback) {
+          this.#onEnterCallback();
+        }
+      }
+      if (!entries[0].isIntersecting && rectY < 0 && this.#isEnterd) {
+        if (this.#onLeaveBackCallback) {
+          this.#onLeaveBackCallback();
+        }
       }
     };
 
