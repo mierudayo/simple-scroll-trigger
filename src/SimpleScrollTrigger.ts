@@ -10,15 +10,17 @@ type PointOption = {
   unit: "px" | "%";
 };
 export class SimpleScrollTrigger {
-  private triggerElemet: Element;
+  #triggerElemet: Element;
 
-  private onEnterCallback: () => void;
+  #onEnterCallback: () => void;
 
-  private observer: IntersectionObserver | null = null;
+  #observer: IntersectionObserver | null = null;
 
-  private startViewPortPoint: number;
+  #startViewPortPoint: number | PointOption;
 
-  private startTriggerPoint: number;
+  #startTriggerPoint: number | PointOption;
+
+  #resizeFlag = false;
 
   constructor({
     trigger,
@@ -26,19 +28,32 @@ export class SimpleScrollTrigger {
     startViewPortPoint,
     startTriggerPoint,
   }: Options) {
-    this.triggerElemet = trigger;
-    this.onEnterCallback = onEnter;
+    this.#triggerElemet = trigger;
+    this.#onEnterCallback = onEnter;
 
-    this.startViewPortPoint =
-      this._convertPxViewPortPointOption(startViewPortPoint);
-    this.startTriggerPoint = this._convertPxTargetointOption(startTriggerPoint);
-    console.log(startTriggerPoint, this.startTriggerPoint);
-    this.setupObserver();
+    this.#startViewPortPoint = startViewPortPoint ?? 0;
+    this.#startTriggerPoint = startTriggerPoint ?? 0;
+    this.#setupObserver();
+
+    // リサイズしたら再セットアップします。
+    window.addEventListener("resize", () => {
+      if (this.#resizeFlag) {
+        return;
+      }
+      this.#resizeFlag = true;
+      this.disconnectObserve();
+      this.#observer = null;
+      this.#setupObserver();
+      setTimeout(() => {
+        this.#resizeFlag = false;
+      }, 200);
+    });
   }
 
-  private _convertPxViewPortPointOption(
-    arg: number | PointOption | undefined
-  ): number {
+  /**
+   * 位置指定オプションからビューポートの位置に変換します
+   */
+  #convertPxViewPortPointOption(arg: number | PointOption | undefined): number {
     const windowHeight = window.innerHeight;
 
     if (arg === undefined) {
@@ -53,8 +68,11 @@ export class SimpleScrollTrigger {
     return (windowHeight * (100 - arg.value)) / 100;
   }
 
-  private _convertPxTargetointOption(arg: number | PointOption | undefined) {
-    const targetElementHeight = this.triggerElemet.clientHeight;
+  /**
+   * 位置指定オプションからターゲットの位置に変換します
+   */
+  #convertPxTargetPointOption(arg: number | PointOption | undefined) {
+    const targetElementHeight = this.#triggerElemet.clientHeight;
     if (arg === undefined) {
       return 0;
     }
@@ -67,37 +85,41 @@ export class SimpleScrollTrigger {
     return (targetElementHeight * arg.value) / 100;
   }
 
-  private setupObserver() {
+  /**
+   * オブザーバーをセットアップします。
+   */
+  #setupObserver() {
     // 閾値の配列作成
     const threshold = [0, 1];
-    // for (let i = 1; i < 100; i++) {
-    //   threshold.push(i / 100);
-    // }
-    // for (let i = 1; i < 10; i++) {
-    //   threshold.push(0.99 + i / 1000);
-    // }
     const callback = (entries: IntersectionObserverEntry[]) => {
-      console.log(
-        entries[0].intersectionRatio,
-        entries[0].rootBounds!.y - entries[0].boundingClientRect.y
-      );
-      if (entries[0].isIntersecting) {
-        this.onEnterCallback();
+      const rectY =
+        (entries[0].rootBounds?.y ?? 0) - entries[0].boundingClientRect.y;
+      if (entries[0].isIntersecting && rectY < 0) {
+        this.#onEnterCallback();
       }
     };
 
-    console.log(
-      `${this.startTriggerPoint + this.startViewPortPoint}px 0px ${-(
-        this.startTriggerPoint + this.startViewPortPoint
-      )}px`
+    const startViewPortPx = this.#convertPxViewPortPointOption(
+      this.#startViewPortPoint
     );
-    this.observer = new IntersectionObserver(callback, {
-      rootMargin: `${
-        this.startTriggerPoint + this.startViewPortPoint
-      }px 0px ${-(this.startTriggerPoint + this.startViewPortPoint)}px`,
+    const startTargetPx = this.#convertPxTargetPointOption(
+      this.#startTriggerPoint
+    );
+
+    this.#observer = new IntersectionObserver(callback, {
+      rootMargin: `${startTargetPx + startViewPortPx}px 0px ${-(
+        startTargetPx + startViewPortPx
+      )}px`,
       threshold: threshold,
     });
 
-    this.observer.observe(this.triggerElemet);
+    this.#observer.observe(this.#triggerElemet);
+  }
+
+  /**
+   * 監視を停止します
+   */
+  public disconnectObserve() {
+    this.#observer?.disconnect();
   }
 }
