@@ -1,15 +1,24 @@
+/**
+ * 設定内容
+ */
 type Options = {
+  /** 交差対象の要素です */
   trigger: Element;
   onEnter?: () => void;
   onLeaveBack?: () => void;
   onLeave?: () => void;
   onEnterBack?: () => void;
+  /** start判定基準となる画面上端からの距離です */
   startViewPortPoint?: number | PointOption;
+  /** start判定基準となる要素上端からの距離です */
   startTriggerPoint?: number | PointOption;
   endViewPortPoint?: number | PointOption;
   endTriggerPoint?: number | PointOption;
 };
 
+/**
+ * 距離指定のオプションです
+ */
 type PointOption = {
   value: number;
   unit: "px" | "%";
@@ -201,5 +210,6 @@ export class SimpleScrollTrigger {
    */
   public disconnectObserve() {
     this.#startObserver?.disconnect();
+    this.#endObserver?.disconnect();
   }
 }

@@ -1,8 +1,32 @@
 {
-  "name": "simple",
-  "private": true,
-  "version": "0.0.0",
+  "name": "simple-scroll-trigger",
+  "version": "1.0.0",
   "type": "module",
+  "files": [
+    "dist","types"
+  ],
+  "main": "./dist/SimpleScrollTrigger.umd.js",
+  "module": "./dist/SimpleScrollTrigger.js",
+  "exports": {
+    ".": {
+      "import": "./dist/SimpleScrollTrigger.js",
+      "require": "./dist/SimpleScrollTrigger.umd.js"
+    }
+  },
+  "types": "./types/SimpleScrollTrigger.d.ts",
+  "author": "Nishihara Tsubasa",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Crayfisher-zari/simpleScrollTrigger.git"
+  },
+  "keywords": [
+    "JavaScript",
+    "TypeScript",
+    "CSS",
+    "Scroll",
+    "Animation"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -10,6 +34,7 @@
     "format": "eslint src/**/*.ts --fix && prettier src/**/*.{ts,css} --write"
   },
   "devDependencies": {
+    "@types/node": "18.11.10",
     "@typescript-eslint/eslint-plugin": "5.44.0",
     "@typescript-eslint/parser": "5.44.0",
     "eslint": "8.28.0",

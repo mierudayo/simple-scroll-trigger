@@ -1,4 +1,4 @@
-import { SimpleScrollTrigger } from "./SimpleScrollTrigger";
+import { SimpleScrollTrigger } from "../src/SimpleScrollTrigger";
 
 const trigger = document.querySelector(".trigger");
 if (trigger) {
@@ -16,9 +16,9 @@ if (trigger) {
     onEnterBack: () => {
       console.log("onEnterBack");
     },
-    startViewPortPoint: { value: 100, unit: "%" },
-    startTriggerPoint: { value: 500, unit: "px" },
-    endViewPortPoint: { value: 100, unit: "%" },
+    startViewPortPoint: { value: 0, unit: "%" },
+    startTriggerPoint: { value: 50, unit: "px" },
+    endViewPortPoint: { value: 50, unit: "%" },
     endTriggerPoint: { value: 100, unit: "%" },
   });
 }

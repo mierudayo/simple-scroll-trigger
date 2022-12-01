@@ -4,17 +4,17 @@
   box-sizing: border-box;
 }
 .spacer {
-  height: 600px;
+  height: 100px;
 }
 .trigger {
   background-color: pink;
-  height: 1000px;
+  height: 200px;
   position: relative;
 }
 
 .marker {
   position: absolute;
-  top: 50%;
+  top: 500px;
   right: 0;
   width: 45px;
   border-bottom: 1px solid red;
