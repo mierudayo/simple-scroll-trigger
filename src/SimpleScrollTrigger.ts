@@ -2,43 +2,67 @@ type Options = {
   trigger: Element;
   onEnter?: () => void;
   onLeaveBack?: () => void;
+  onLeave?: () => void;
+  onEnterBack?: () => void;
   startViewPortPoint?: number | PointOption;
   startTriggerPoint?: number | PointOption;
+  endViewPortPoint?: number | PointOption;
+  endTriggerPoint?: number | PointOption;
 };
 
 type PointOption = {
   value: number;
   unit: "px" | "%";
 };
+
 export class SimpleScrollTrigger {
   #triggerElemet: Element;
 
   #onEnterCallback: (() => void) | undefined;
   #onLeaveBackCallback: (() => void) | undefined;
+  #onLeaveCallback: (() => void) | undefined;
+  #onEnterBackCallback: (() => void) | undefined;
 
-  #observer: IntersectionObserver | null = null;
+  #startObserver: IntersectionObserver | null = null;
+  #endObserver: IntersectionObserver | null = null;
 
   #startViewPortPoint: number | PointOption;
 
   #startTriggerPoint: number | PointOption;
 
+  #endViewPortPoint: number | PointOption | undefined;
+
+  #endTriggerPoint: number | PointOption | undefined;
+
   #resizeFlag = false;
 
-  #isEnterd = false;
+  #isStartEnterd = false;
+  #isEndEnterd = false;
 
   constructor({
     trigger,
     onEnter,
     onLeaveBack,
+    onLeave,
+    onEnterBack,
     startViewPortPoint,
     startTriggerPoint,
+    endViewPortPoint,
+    endTriggerPoint,
   }: Options) {
     this.#triggerElemet = trigger;
     this.#onEnterCallback = onEnter;
     this.#onLeaveBackCallback = onLeaveBack;
+    this.#onLeaveCallback = onLeave;
+    this.#onEnterBackCallback = onEnterBack;
 
     this.#startViewPortPoint = startViewPortPoint ?? 0;
     this.#startTriggerPoint = startTriggerPoint ?? 0;
+
+    // 終点の指定
+    this.#endViewPortPoint = endViewPortPoint;
+    this.#endTriggerPoint = endTriggerPoint;
+
     this.#setupObserver();
 
     // リサイズしたら再セットアップします。
@@ -48,7 +72,8 @@ export class SimpleScrollTrigger {
       }
       this.#resizeFlag = true;
       this.disconnectObserve();
-      this.#observer = null;
+      this.#startObserver = null;
+      this.#endObserver = null;
       this.#setupObserver();
       setTimeout(() => {
         this.#resizeFlag = false;
@@ -97,21 +122,40 @@ export class SimpleScrollTrigger {
   #setupObserver() {
     // 閾値の配列作成
     const threshold = [0, 1];
-    const callback = (entries: IntersectionObserverEntry[]) => {
+    const startCallback = (entries: IntersectionObserverEntry[]) => {
       const rectY =
         (entries[0].rootBounds?.y ?? 0) - entries[0].boundingClientRect.y;
       if (entries[0].isIntersecting && rectY < 0) {
         // 初めて入ったときに入域済みフラグをたてる
-        if (!this.#isEnterd) {
-          this.#isEnterd = true;
+        if (!this.#isStartEnterd) {
+          this.#isStartEnterd = true;
         }
         if (this.#onEnterCallback) {
           this.#onEnterCallback();
         }
       }
-      if (!entries[0].isIntersecting && rectY < 0 && this.#isEnterd) {
+      if (!entries[0].isIntersecting && rectY < 0 && this.#isStartEnterd) {
         if (this.#onLeaveBackCallback) {
           this.#onLeaveBackCallback();
+        }
+      }
+    };
+
+    const endCallback = (entries: IntersectionObserverEntry[]) => {
+      const rectY =
+        (entries[0].rootBounds?.y ?? 0) - entries[0].boundingClientRect.y;
+      if (entries[0].isIntersecting && rectY < 0) {
+        // 初めて入ったときに入域済みフラグをたてる
+        if (!this.#isEndEnterd) {
+          this.#isEndEnterd = true;
+        }
+        if (this.#onLeaveCallback) {
+          this.#onLeaveCallback();
+        }
+      }
+      if (!entries[0].isIntersecting && rectY < 0 && this.#isEndEnterd) {
+        if (this.#onEnterBackCallback) {
+          this.#onEnterBackCallback();
         }
       }
     };
@@ -123,20 +167,39 @@ export class SimpleScrollTrigger {
       this.#startTriggerPoint
     );
 
-    this.#observer = new IntersectionObserver(callback, {
+    this.#startObserver = new IntersectionObserver(startCallback, {
       rootMargin: `${startTargetPx + startViewPortPx}px 0px ${-(
         startTargetPx + startViewPortPx
       )}px`,
       threshold: threshold,
     });
 
-    this.#observer.observe(this.#triggerElemet);
+    this.#startObserver.observe(this.#triggerElemet);
+
+    // 終点のオブザーバー
+    if (!this.#endViewPortPoint && !this.#endTriggerPoint) {
+      return;
+    }
+
+    const endViewPortPx = this.#convertPxViewPortPointOption(
+      this.#endViewPortPoint
+    );
+    const endTargetPx = this.#convertPxTargetPointOption(this.#endTriggerPoint);
+
+    this.#endObserver = new IntersectionObserver(endCallback, {
+      rootMargin: `${endViewPortPx + endTargetPx}px 0px ${-(
+        endViewPortPx + endTargetPx
+      )}px`,
+      threshold: threshold,
+    });
+
+    this.#endObserver.observe(this.#triggerElemet);
   }
 
   /**
    * 監視を停止します
    */
   public disconnectObserve() {
-    this.#observer?.disconnect();
+    this.#startObserver?.disconnect();
   }
 }

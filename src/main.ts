@@ -10,7 +10,15 @@ if (trigger) {
     onLeaveBack: () => {
       console.log("onLeaveBack");
     },
-    startViewPortPoint: { value: 0, unit: "%" },
-    startTriggerPoint: { value: 0, unit: "px" },
+    onLeave: () => {
+      console.log("onLeave");
+    },
+    onEnterBack: () => {
+      console.log("onEnterBack");
+    },
+    startViewPortPoint: { value: 100, unit: "%" },
+    startTriggerPoint: { value: 500, unit: "px" },
+    endViewPortPoint: { value: 100, unit: "%" },
+    endTriggerPoint: { value: 100, unit: "%" },
   });
 }
