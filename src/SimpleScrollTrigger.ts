@@ -3,16 +3,22 @@
  */
 type Options = {
   /** 交差対象の要素です */
-  trigger: Element;
+  trigger: Element | null;
+  /** 入ったときに呼ばれる関数です */
   onEnter?: () => void;
+  /** 出戻ったときに呼ばれる関数です */
   onLeaveBack?: () => void;
+  /** 通過したときに呼ばれる関数です */
   onLeave?: () => void;
+  /** 入り戻ったときに呼ばれる関数です */
   onEnterBack?: () => void;
   /** start判定基準となる画面上端からの距離です */
   startViewPortPoint?: number | PointOption;
   /** start判定基準となる要素上端からの距離です */
   startTriggerPoint?: number | PointOption;
+  /** end判定基準となる画面上端からの距離です */
   endViewPortPoint?: number | PointOption;
+  /** start判定基準となる要素上端からの距離です */
   endTriggerPoint?: number | PointOption;
 };
 
@@ -25,7 +31,7 @@ type PointOption = {
 };
 
 export class SimpleScrollTrigger {
-  #triggerElemet: Element;
+  #triggerElemet: Element | null = null;
 
   #onEnterCallback: (() => void) | undefined;
   #onLeaveBackCallback: (() => void) | undefined;
@@ -35,9 +41,9 @@ export class SimpleScrollTrigger {
   #startObserver: IntersectionObserver | null = null;
   #endObserver: IntersectionObserver | null = null;
 
-  #startViewPortPoint: number | PointOption;
+  #startViewPortPoint: number | PointOption = 0;
 
-  #startTriggerPoint: number | PointOption;
+  #startTriggerPoint: number | PointOption = 0;
 
   #endViewPortPoint: number | PointOption | undefined;
 
@@ -59,14 +65,23 @@ export class SimpleScrollTrigger {
     endViewPortPoint,
     endTriggerPoint,
   }: Options) {
+    if (!trigger) {
+      console.warn("Trigger element is Null");
+      return;
+    }
     this.#triggerElemet = trigger;
     this.#onEnterCallback = onEnter;
     this.#onLeaveBackCallback = onLeaveBack;
     this.#onLeaveCallback = onLeave;
     this.#onEnterBackCallback = onEnterBack;
 
-    this.#startViewPortPoint = startViewPortPoint ?? 0;
-    this.#startTriggerPoint = startTriggerPoint ?? 0;
+    // 始点の設定
+    if (startViewPortPoint) {
+      this.#startViewPortPoint = startViewPortPoint;
+    }
+    if (startTriggerPoint) {
+      this.#startTriggerPoint = startTriggerPoint;
+    }
 
     // 終点の指定
     this.#endViewPortPoint = endViewPortPoint;
@@ -112,6 +127,9 @@ export class SimpleScrollTrigger {
    * 位置指定オプションからターゲットの位置に変換します
    */
   #convertPxTargetPointOption(arg: number | PointOption | undefined) {
+    if (!this.#triggerElemet) {
+      return;
+    }
     const targetElementHeight = this.#triggerElemet.clientHeight;
     if (arg === undefined) {
       return 0;
@@ -129,9 +147,13 @@ export class SimpleScrollTrigger {
    * オブザーバーをセットアップします。
    */
   #setupObserver() {
+    if (!this.#triggerElemet) {
+      return;
+    }
     // 閾値の配列作成
     const threshold = [0, 1];
     const startCallback = (entries: IntersectionObserverEntry[]) => {
+      // 判定範囲の矩形のy座標とトリガー要素のy座標。入った時はこの差は必ずマイナスになる。
       const rectY =
         (entries[0].rootBounds?.y ?? 0) - entries[0].boundingClientRect.y;
       if (entries[0].isIntersecting && rectY < 0) {
@@ -176,6 +198,10 @@ export class SimpleScrollTrigger {
       this.#startTriggerPoint
     );
 
+    if (!startTargetPx) {
+      return;
+    }
+
     this.#startObserver = new IntersectionObserver(startCallback, {
       rootMargin: `${startTargetPx + startViewPortPx}px 0px ${-(
         startTargetPx + startViewPortPx
@@ -195,6 +221,9 @@ export class SimpleScrollTrigger {
     );
     const endTargetPx = this.#convertPxTargetPointOption(this.#endTriggerPoint);
 
+    if (!endTargetPx) {
+      return;
+    }
     this.#endObserver = new IntersectionObserver(endCallback, {
       rootMargin: `${endViewPortPx + endTargetPx}px 0px ${-(
         endViewPortPx + endTargetPx

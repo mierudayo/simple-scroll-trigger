@@ -1,14 +1,17 @@
+html {
+  font-family: sans-serif;
+}
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 .spacer {
-  height: 100px;
+  height: 800px;
 }
 .trigger {
   background-color: pink;
-  height: 200px;
+  height: 1000px;
   position: relative;
 }
 
