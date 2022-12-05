@@ -49,8 +49,6 @@ export class SimpleScrollTrigger {
 
   #endTriggerPoint: number | PointOption | undefined;
 
-  #resizeFlag = false;
-
   #isStartEnterd = false;
   #isEndEnterd = false;
 
@@ -91,17 +89,10 @@ export class SimpleScrollTrigger {
 
     // リサイズしたら再セットアップします。
     window.addEventListener("resize", () => {
-      if (this.#resizeFlag) {
-        return;
-      }
-      this.#resizeFlag = true;
       this.disconnectObserve();
       this.#startObserver = null;
       this.#endObserver = null;
       this.#setupObserver();
-      setTimeout(() => {
-        this.#resizeFlag = false;
-      }, 200);
     });
   }
 
