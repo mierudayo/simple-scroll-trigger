@@ -30,6 +30,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build:doc": "tsc && vite build --mode=doc",
     "preview": "vite preview",
     "format": "eslint src/**/*.ts --fix && prettier src/**/*.ts --write"
   },
