@@ -12,13 +12,10 @@ export default defineConfig(({ command, mode, ssrBuild }) => ({
           },
         }
       : {
-          outDir: "doc",
+          outDir: "docs",
           rollupOptions: {
             input: {
               main: path.resolve(__dirname, "example/index.html"),
-            },
-            output: {
-              dir: "doc",
             },
           },
         },
