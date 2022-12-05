@@ -48,7 +48,7 @@ new SimpleScrollTrigger({
 MIT
 
 # サンプル
-[トリガーとコールバックの模式サンプル]https://(crayfisher-zari.github.io/simpleScrollTrigger/example/)
+[トリガーとコールバックの模式サンプル](https://crayfisher-zari.github.io/simpleScrollTrigger/example/)
 
 # その他
 - 縦スクロールのみに対応しています。
