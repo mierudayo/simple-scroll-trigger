@@ -74,10 +74,10 @@ export class SimpleScrollTrigger {
     this.#onEnterBackCallback = onEnterBack;
 
     // 始点の設定
-    if (startViewPortPoint) {
+    if (startViewPortPoint !== undefined) {
       this.#startViewPortPoint = startViewPortPoint;
     }
-    if (startTriggerPoint) {
+    if (startTriggerPoint !== undefined) {
       this.#startTriggerPoint = startTriggerPoint;
     }
 
@@ -188,8 +188,7 @@ export class SimpleScrollTrigger {
     const startTargetPx = this.#convertPxTargetPointOption(
       this.#startTriggerPoint
     );
-
-    if (!startTargetPx) {
+    if (startTargetPx === undefined) {
       return;
     }
 
@@ -203,7 +202,10 @@ export class SimpleScrollTrigger {
     this.#startObserver.observe(this.#triggerElemet);
 
     // 終点のオブザーバー
-    if (!this.#endViewPortPoint && !this.#endTriggerPoint) {
+    if (
+      this.#endViewPortPoint === undefined &&
+      this.#endTriggerPoint === undefined
+    ) {
       return;
     }
 
@@ -212,7 +214,7 @@ export class SimpleScrollTrigger {
     );
     const endTargetPx = this.#convertPxTargetPointOption(this.#endTriggerPoint);
 
-    if (!endTargetPx) {
+    if (endTargetPx === undefined) {
       return;
     }
     this.#endObserver = new IntersectionObserver(endCallback, {
