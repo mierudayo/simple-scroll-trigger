@@ -1,34 +1,7 @@
-/**
- * 設定内容
- */
-type Options = {
-  /** 交差対象の要素です */
-  trigger: Element | null;
-  /** 入ったときに呼ばれる関数です */
-  onEnter?: () => void;
-  /** 出戻ったときに呼ばれる関数です */
-  onLeaveBack?: () => void;
-  /** 通過したときに呼ばれる関数です */
-  onLeave?: () => void;
-  /** 入り戻ったときに呼ばれる関数です */
-  onEnterBack?: () => void;
-  /** start判定基準となる画面上端からの距離です */
-  startViewPortPoint?: number | PointOption;
-  /** start判定基準となる要素上端からの距離です */
-  startTriggerPoint?: number | PointOption;
-  /** end判定基準となる画面上端からの距離です */
-  endViewPortPoint?: number | PointOption;
-  /** start判定基準となる要素上端からの距離です */
-  endTriggerPoint?: number | PointOption;
-};
-
-/**
- * 距離指定のオプションです
- */
-type PointOption = {
-  value: number;
-  unit: "px" | "%";
-};
+import { convertTargetOption2Px } from "./converter/convertTargetOption2Px";
+import { convertViewPortOption2Px } from "./converter/convertViewPortOption2Px";
+import { Options } from "./types/Options";
+import { PointOption } from "./types/PointOption";
 
 export class SimpleScrollTrigger {
   #triggerElemet: Element | null = null;
@@ -96,43 +69,6 @@ export class SimpleScrollTrigger {
     });
   }
 
-  /**
-   * 位置指定オプションからビューポートの位置に変換します
-   */
-  #convertPxViewPortPointOption(arg: number | PointOption | undefined): number {
-    const windowHeight = window.innerHeight;
-
-    if (arg === undefined) {
-      return windowHeight;
-    }
-    if (typeof arg === "number") {
-      return windowHeight - arg;
-    }
-    if (arg.unit === "px") {
-      return windowHeight - arg.value;
-    }
-    return (windowHeight * (100 - arg.value)) / 100;
-  }
-
-  /**
-   * 位置指定オプションからターゲットの位置に変換します
-   */
-  #convertPxTargetPointOption(arg: number | PointOption | undefined) {
-    if (!this.#triggerElemet) {
-      return;
-    }
-    const targetElementHeight = this.#triggerElemet.clientHeight;
-    if (arg === undefined) {
-      return 0;
-    }
-    if (typeof arg === "number") {
-      return arg;
-    }
-    if (arg.unit === "px") {
-      return arg.value;
-    }
-    return (targetElementHeight * arg.value) / 100;
-  }
 
   /**
    * オブザーバーをセットアップします。
@@ -182,10 +118,9 @@ export class SimpleScrollTrigger {
       }
     };
 
-    const startViewPortPx = this.#convertPxViewPortPointOption(
-      this.#startViewPortPoint
-    );
-    const startTargetPx = this.#convertPxTargetPointOption(
+    const startViewPortPx = convertViewPortOption2Px(this.#startViewPortPoint);
+    const startTargetPx = convertTargetOption2Px(
+      this.#triggerElemet,
       this.#startTriggerPoint
     );
     if (startTargetPx === undefined) {
@@ -209,10 +144,11 @@ export class SimpleScrollTrigger {
       return;
     }
 
-    const endViewPortPx = this.#convertPxViewPortPointOption(
-      this.#endViewPortPoint
+    const endViewPortPx = convertViewPortOption2Px(this.#endViewPortPoint);
+    const endTargetPx = convertTargetOption2Px(
+      this.#triggerElemet,
+      this.#endTriggerPoint
     );
-    const endTargetPx = this.#convertPxTargetPointOption(this.#endTriggerPoint);
 
     if (endTargetPx === undefined) {
       return;
