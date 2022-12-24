@@ -1,3 +1,4 @@
+import { IntersectionCallback } from "./callback/IntersectionCallback";
 import { convertTargetOption2Px } from "./converter/convertTargetOption2Px";
 import { convertViewPortOption2Px } from "./converter/convertViewPortOption2Px";
 import { Options } from "./types/Options";
@@ -21,9 +22,6 @@ export class SimpleScrollTrigger {
   #endViewPortPoint: number | PointOption | undefined;
 
   #endTriggerPoint: number | PointOption | undefined;
-
-  #isStartEnterd = false;
-  #isEndEnterd = false;
 
   constructor({
     trigger,
@@ -69,7 +67,6 @@ export class SimpleScrollTrigger {
     });
   }
 
-
   /**
    * オブザーバーをセットアップします。
    */
@@ -79,44 +76,15 @@ export class SimpleScrollTrigger {
     }
     // 閾値の配列作成
     const threshold = [0, 1];
-    const startCallback = (entries: IntersectionObserverEntry[]) => {
-      // 判定範囲の矩形のy座標とトリガー要素のy座標。入った時はこの差は必ずマイナスになる。
-      const rectY =
-        (entries[0].rootBounds?.y ?? 0) - entries[0].boundingClientRect.y;
-      if (entries[0].isIntersecting && rectY < 0) {
-        // 初めて入ったときに入域済みフラグをたてる
-        if (!this.#isStartEnterd) {
-          this.#isStartEnterd = true;
-        }
-        if (this.#onEnterCallback) {
-          this.#onEnterCallback();
-        }
-      }
-      if (!entries[0].isIntersecting && rectY < 0 && this.#isStartEnterd) {
-        if (this.#onLeaveBackCallback) {
-          this.#onLeaveBackCallback();
-        }
-      }
-    };
+    const startCallback = new IntersectionCallback({
+      forwardCallback: this.#onEnterCallback,
+      backCallback: this.#onLeaveBackCallback,
+    });
 
-    const endCallback = (entries: IntersectionObserverEntry[]) => {
-      const rectY =
-        (entries[0].rootBounds?.y ?? 0) - entries[0].boundingClientRect.y;
-      if (entries[0].isIntersecting && rectY < 0) {
-        // 初めて入ったときに入域済みフラグをたてる
-        if (!this.#isEndEnterd) {
-          this.#isEndEnterd = true;
-        }
-        if (this.#onLeaveCallback) {
-          this.#onLeaveCallback();
-        }
-      }
-      if (!entries[0].isIntersecting && rectY < 0 && this.#isEndEnterd) {
-        if (this.#onEnterBackCallback) {
-          this.#onEnterBackCallback();
-        }
-      }
-    };
+    const endCallback = new IntersectionCallback({
+      forwardCallback: this.#onLeaveCallback,
+      backCallback: this.#onEnterBackCallback,
+    });
 
     const startViewPortPx = convertViewPortOption2Px(this.#startViewPortPoint);
     const startTargetPx = convertTargetOption2Px(
@@ -127,7 +95,7 @@ export class SimpleScrollTrigger {
       return;
     }
 
-    this.#startObserver = new IntersectionObserver(startCallback, {
+    this.#startObserver = new IntersectionObserver(startCallback.callback, {
       rootMargin: `${startTargetPx + startViewPortPx}px 0px ${-(
         startTargetPx + startViewPortPx
       )}px`,
@@ -153,7 +121,7 @@ export class SimpleScrollTrigger {
     if (endTargetPx === undefined) {
       return;
     }
-    this.#endObserver = new IntersectionObserver(endCallback, {
+    this.#endObserver = new IntersectionObserver(endCallback.callback, {
       rootMargin: `${endViewPortPx + endTargetPx}px 0px ${-(
         endViewPortPx + endTargetPx
       )}px`,
