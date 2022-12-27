@@ -23,6 +23,8 @@ export class SimpleScrollTrigger {
 
   #endTriggerPoint: number | PointOption | undefined;
 
+  #isOnce: boolean = false;
+
   constructor({
     trigger,
     onEnter,
@@ -33,6 +35,7 @@ export class SimpleScrollTrigger {
     startTriggerPoint,
     endViewPortPoint,
     endTriggerPoint,
+    once,
   }: Options) {
     if (!trigger) {
       console.warn("Trigger element is Null");
@@ -43,6 +46,7 @@ export class SimpleScrollTrigger {
     this.#onLeaveBackCallback = onLeaveBack;
     this.#onLeaveCallback = onLeave;
     this.#onEnterBackCallback = onEnterBack;
+    this.#isOnce = Boolean(once);
 
     // 始点の設定
     if (startViewPortPoint !== undefined) {
@@ -95,12 +99,21 @@ export class SimpleScrollTrigger {
       return;
     }
 
-    this.#startObserver = new IntersectionObserver(startCallback.callback, {
-      rootMargin: `${startTargetPx + startViewPortPx}px 0px ${-(
-        startTargetPx + startViewPortPx
-      )}px`,
-      threshold: threshold,
-    });
+    this.#startObserver = new IntersectionObserver(
+      (entries: IntersectionObserverEntry[]) => {
+        startCallback.callback(entries);
+        // onceフラグがあり、すべてのコールバックが呼ばれたら監視を停止する
+        if (this.#isOnce && startCallback.isAllCalled) {
+          this.#startObserver?.disconnect();
+        }
+      },
+      {
+        rootMargin: `${startTargetPx + startViewPortPx}px 0px ${-(
+          startTargetPx + startViewPortPx
+        )}px`,
+        threshold: threshold,
+      }
+    );
 
     this.#startObserver.observe(this.#triggerElemet);
 
@@ -121,12 +134,22 @@ export class SimpleScrollTrigger {
     if (endTargetPx === undefined) {
       return;
     }
-    this.#endObserver = new IntersectionObserver(endCallback.callback, {
-      rootMargin: `${endViewPortPx + endTargetPx}px 0px ${-(
-        endViewPortPx + endTargetPx
-      )}px`,
-      threshold: threshold,
-    });
+    this.#endObserver = new IntersectionObserver(
+      (entries: IntersectionObserverEntry[]) => {
+        endCallback.callback(entries);
+        // onceフラグがあり、すべてのコールバックが呼ばれたら監視を停止する
+
+        if (this.#isOnce && endCallback.isAllCalled) {
+          this.#endObserver?.disconnect();
+        }
+      },
+      {
+        rootMargin: `${endViewPortPx + endTargetPx}px 0px ${-(
+          endViewPortPx + endTargetPx
+        )}px`,
+        threshold: threshold,
+      }
+    );
 
     this.#endObserver.observe(this.#triggerElemet);
   }
