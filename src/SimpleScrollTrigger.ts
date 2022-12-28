@@ -7,10 +7,8 @@ import { PointOption } from "./types/PointOption";
 export class SimpleScrollTrigger {
   #triggerElemet: Element | null = null;
 
-  #onEnterCallback: (() => void) | undefined;
-  #onLeaveBackCallback: (() => void) | undefined;
-  #onLeaveCallback: (() => void) | undefined;
-  #onEnterBackCallback: (() => void) | undefined;
+  #startCallbacks:IntersectionCallback | null = null;
+  #endCallbacks:IntersectionCallback | null = null;
 
   #startObserver: IntersectionObserver | null = null;
   #endObserver: IntersectionObserver | null = null;
@@ -42,10 +40,6 @@ export class SimpleScrollTrigger {
       return;
     }
     this.#triggerElemet = trigger;
-    this.#onEnterCallback = onEnter;
-    this.#onLeaveBackCallback = onLeaveBack;
-    this.#onLeaveCallback = onLeave;
-    this.#onEnterBackCallback = onEnterBack;
     this.#isOnce = Boolean(once);
 
     // 始点の設定
@@ -59,6 +53,17 @@ export class SimpleScrollTrigger {
     // 終点の指定
     this.#endViewPortPoint = endViewPortPoint;
     this.#endTriggerPoint = endTriggerPoint;
+
+    // コールバックの作成
+    this.#startCallbacks = new IntersectionCallback({
+      forwardCallback: onEnter,
+      backCallback: onLeaveBack
+    });
+
+    this.#endCallbacks = new IntersectionCallback({
+      forwardCallback: onLeave,
+      backCallback: onEnterBack,
+    });
 
     this.#setupObserver();
 
@@ -80,15 +85,7 @@ export class SimpleScrollTrigger {
     }
     // 閾値の配列作成
     const threshold = [0, 1];
-    const startCallback = new IntersectionCallback({
-      forwardCallback: this.#onEnterCallback,
-      backCallback: this.#onLeaveBackCallback,
-    });
-
-    const endCallback = new IntersectionCallback({
-      forwardCallback: this.#onLeaveCallback,
-      backCallback: this.#onEnterBackCallback,
-    });
+    
 
     const startViewPortPx = convertViewPortOption2Px(this.#startViewPortPoint);
     const startTargetPx = convertTargetOption2Px(
@@ -101,9 +98,12 @@ export class SimpleScrollTrigger {
 
     this.#startObserver = new IntersectionObserver(
       (entries: IntersectionObserverEntry[]) => {
-        startCallback.callback(entries);
+        if(!this.#startCallbacks){
+          return
+        }
+        this.#startCallbacks.callback(entries);
         // onceフラグがあり、すべてのコールバックが呼ばれたら監視を停止する
-        if (this.#isOnce && startCallback.isAllCalled) {
+        if (this.#isOnce &&  this.#startCallbacks.isAllCalled) {
           this.#startObserver?.disconnect();
         }
       },
@@ -136,10 +136,13 @@ export class SimpleScrollTrigger {
     }
     this.#endObserver = new IntersectionObserver(
       (entries: IntersectionObserverEntry[]) => {
-        endCallback.callback(entries);
+        if(!this.#endCallbacks){
+          return
+        }
+        this.#endCallbacks.callback(entries);
         // onceフラグがあり、すべてのコールバックが呼ばれたら監視を停止する
 
-        if (this.#isOnce && endCallback.isAllCalled) {
+        if (this.#isOnce && this.#endCallbacks.isAllCalled) {
           this.#endObserver?.disconnect();
         }
       },

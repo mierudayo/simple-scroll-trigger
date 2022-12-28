@@ -15,6 +15,7 @@ export class IntersectionCallback {
   #isForwradCalled: null | boolean = null;
   #isBackCalled: null | boolean = null;
   constructor({ forwardCallback, backCallback }: Constructor) {
+    console.log("constructor");
     this.#forwardCallback = forwardCallback;
     this.#backCallback = backCallback;
     if (forwardCallback !== undefined) {
@@ -30,24 +31,29 @@ export class IntersectionCallback {
       // 判定範囲の矩形のy座標とトリガー要素のy座標。入った時はこの差は必ずマイナスになる。
       const rectY =
         (entries[0].rootBounds?.y ?? 0) - entries[0].boundingClientRect.y;
-      // 交差判定があり、y座標の差がマイナスの時は入ったときのコールバックを呼ぶ
-      if (entries[0].isIntersecting && rectY < 0) {
-        // 初めて入ったときに入域済みフラグをたてる
-        if (this.#isEntered === false) {
-          this.#isEntered = true;
-        }
-        if (this.#forwardCallback) {
-          // 呼ばれたらフラグを建てる
-          this.#isForwradCalled = true;
-          this.#forwardCallback();
+      if (!this.#isForwradCalled) {
+        // 交差判定があり、y座標の差がマイナスの時は入ったときのコールバックを呼ぶ
+        if (entries[0].isIntersecting && rectY < 0) {
+          // 初めて入ったときに入域済みフラグをたてる
+          if (this.#isEntered === false) {
+            this.#isEntered = true;
+          }
+          if (this.#forwardCallback) {
+            // 呼ばれたらフラグを建てる
+            this.#isForwradCalled = true;
+            this.#forwardCallback();
+          }
         }
       }
-      // 交差判定がなく、y座標の差がマイナスの時は入ったとき、さらに入域済みフラグがある場合は出ていったときのコールバックを呼ぶ
-      if (!entries[0].isIntersecting && rectY < 0 && this.#isEntered) {
-        if (this.#backCallback) {
-          // 呼ばれたらフラグを建てる
-          this.#isBackCalled = true;
-          this.#backCallback();
+
+      if (!this.#isBackCalled) {
+        // 交差判定がなく、y座標の差がマイナスの時は入ったとき、さらに入域済みフラグがある場合は出ていったときのコールバックを呼ぶ
+        if (!entries[0].isIntersecting && rectY < 0 && this.#isEntered) {
+          if (this.#backCallback) {
+            // 呼ばれたらフラグを建てる
+            this.#isBackCalled = true;
+            this.#backCallback();
+          }
         }
       }
     };
@@ -74,7 +80,7 @@ export class IntersectionCallback {
   }
 }
 
-function whichCallbackEnabled(forward: Callback, back: Callback) {
+const whichCallbackEnabled = (forward: Callback, back: Callback) => {
   if (forward !== undefined && back == undefined) {
     return "forward";
   }
@@ -85,4 +91,4 @@ function whichCallbackEnabled(forward: Callback, back: Callback) {
     return "both";
   }
   return "nothing";
-}
+};
