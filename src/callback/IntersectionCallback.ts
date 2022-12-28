@@ -3,6 +3,7 @@ type Callback = (() => void) | undefined;
 type Constructor = {
   forwardCallback: Callback;
   backCallback: Callback;
+  isOnce: boolean;
 };
 
 /**
@@ -14,10 +15,11 @@ export class IntersectionCallback {
   #backCallback: undefined | (() => void) = undefined;
   #isForwradCalled: null | boolean = null;
   #isBackCalled: null | boolean = null;
-  constructor({ forwardCallback, backCallback }: Constructor) {
-    console.log("constructor");
+  #isOnce = false;
+  constructor({ forwardCallback, backCallback, isOnce }: Constructor) {
     this.#forwardCallback = forwardCallback;
     this.#backCallback = backCallback;
+    this.#isOnce = isOnce;
     if (forwardCallback !== undefined) {
       this.#isForwradCalled = false;
     }
@@ -39,8 +41,11 @@ export class IntersectionCallback {
             this.#isEntered = true;
           }
           if (this.#forwardCallback) {
-            // 呼ばれたらフラグを建てる
-            this.#isForwradCalled = true;
+            // isOnceが有効な場合に呼ばれたらフラグを建てる
+            if (this.#isOnce) {
+              this.#isForwradCalled = true;
+            }
+
             this.#forwardCallback();
           }
         }
@@ -50,8 +55,10 @@ export class IntersectionCallback {
         // 交差判定がなく、y座標の差がマイナスの時は入ったとき、さらに入域済みフラグがある場合は出ていったときのコールバックを呼ぶ
         if (!entries[0].isIntersecting && rectY < 0 && this.#isEntered) {
           if (this.#backCallback) {
-            // 呼ばれたらフラグを建てる
-            this.#isBackCalled = true;
+            // isOnceが有効な場合に呼ばれたらフラグを建てる
+            if (this.#isOnce) {
+              this.#isBackCalled = true;
+            }
             this.#backCallback();
           }
         }
