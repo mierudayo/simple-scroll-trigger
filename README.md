@@ -41,6 +41,8 @@ new SimpleScrollTrigger({
   endViewPortPoint: { value: 0, unit: "%" },
   // 終了位置の要素上端からの位置。単位は%もしくはpx。100%とした場合は要素下端の位置に終了判定がくると発火します省略可。省略した場合は要素上端。endViewPortPointと両方省略した場合はend判定は設定されません。 
   endTriggerPoint: { value: 100, unit: "%" },
+  // 関数を一度だけ呼びます
+  isOnce: true
 });
 ```
 
