@@ -1,14 +1,21 @@
-import { IntersectionCallback } from "./callback/IntersectionCallback";
+import {
+  useIntersectionCallback,
+} from "./callback/IntersectionCallback";
 import { convertTargetOption2Px } from "./converter/convertTargetOption2Px";
 import { convertViewPortOption2Px } from "./converter/convertViewPortOption2Px";
 import { Options } from "./types/Options";
 import { PointOption } from "./types/PointOption";
 
+type CallBack = {
+  callback: (entries: IntersectionObserverEntry[]) => void;
+  isAllCalled: () => boolean;
+};
+
 export class SimpleScrollTrigger {
   #triggerElemet: Element | null = null;
 
-  #startCallbacks: IntersectionCallback | null = null;
-  #endCallbacks: IntersectionCallback | null = null;
+  #startCallbacks: CallBack | null = null;
+  #endCallbacks: CallBack | null = null;
 
   #startObserver: IntersectionObserver | null = null;
   #endObserver: IntersectionObserver | null = null;
@@ -55,16 +62,16 @@ export class SimpleScrollTrigger {
     this.#endTriggerPoint = endTriggerPoint;
 
     // コールバックの作成
-    this.#startCallbacks = new IntersectionCallback({
+    this.#startCallbacks = useIntersectionCallback({
       forwardCallback: onEnter,
       backCallback: onLeaveBack,
-      isOnce:this.#isOnce
+      isOnce: this.#isOnce,
     });
 
-    this.#endCallbacks = new IntersectionCallback({
+    this.#endCallbacks = useIntersectionCallback({
       forwardCallback: onLeave,
       backCallback: onEnterBack,
-      isOnce:this.#isOnce
+      isOnce: this.#isOnce,
     });
 
     this.#setupObserver();
@@ -106,7 +113,7 @@ export class SimpleScrollTrigger {
         }
         this.#startCallbacks.callback(entries);
         // onceフラグがあり、すべてのコールバックが呼ばれたら監視を停止する
-        if (this.#isOnce && this.#startCallbacks.isAllCalled) {
+        if (this.#isOnce && this.#startCallbacks.isAllCalled()) {
           this.#startObserver?.disconnect();
         }
       },
@@ -145,7 +152,7 @@ export class SimpleScrollTrigger {
         this.#endCallbacks.callback(entries);
         // onceフラグがあり、すべてのコールバックが呼ばれたら監視を停止する
 
-        if (this.#isOnce && this.#endCallbacks.isAllCalled) {
+        if (this.#isOnce && this.#endCallbacks.isAllCalled()) {
           this.#endObserver?.disconnect();
         }
       },
