@@ -4,12 +4,9 @@ import { PointOption } from "../types/PointOption";
  * 位置指定オプションからビューポートの位置に変換します
  */
 export const convertTargetOption2Px = (
-  element: Element | null,
+  element: Element,
   option: number | PointOption | undefined
-) => {
-  if (!element) {
-    return;
-  }
+):number => {
   const targetElementHeight = element.clientHeight;
   if (option === undefined) {
     return 0;

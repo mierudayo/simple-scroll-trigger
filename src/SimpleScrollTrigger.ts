@@ -1,6 +1,4 @@
-import {
-  useIntersectionCallback,
-} from "./callback/IntersectionCallback";
+import { useIntersectionCallback } from "./callback/IntersectionCallback";
 import { convertTargetOption2Px } from "./converter/convertTargetOption2Px";
 import { convertViewPortOption2Px } from "./converter/convertViewPortOption2Px";
 import { Options } from "./types/Options";
@@ -20,13 +18,11 @@ export class SimpleScrollTrigger {
   #startObserver: IntersectionObserver | null = null;
   #endObserver: IntersectionObserver | null = null;
 
-  #startViewPortPoint: number | PointOption = 0;
+  #startViewPortPx: number = 0;
+  #startTargetPx: number = 0;
 
-  #startTriggerPoint: number | PointOption = 0;
-
-  #endViewPortPoint: number | PointOption | undefined;
-
-  #endTriggerPoint: number | PointOption | undefined;
+  #endViewPortPx: number = 0;
+  #endTargetPx: number = 0;
 
   #isOnce: boolean = false;
 
@@ -50,16 +46,18 @@ export class SimpleScrollTrigger {
     this.#isOnce = Boolean(once);
 
     // 始点の設定
-    if (startViewPortPoint !== undefined) {
-      this.#startViewPortPoint = startViewPortPoint;
-    }
-    if (startTriggerPoint !== undefined) {
-      this.#startTriggerPoint = startTriggerPoint;
-    }
+    this.#startViewPortPx = convertViewPortOption2Px(startViewPortPoint);
+    this.#startTargetPx = convertTargetOption2Px(
+      this.#triggerElemet,
+      startTriggerPoint
+    );
 
     // 終点の指定
-    this.#endViewPortPoint = endViewPortPoint;
-    this.#endTriggerPoint = endTriggerPoint;
+    this.#endViewPortPx = convertViewPortOption2Px(endViewPortPoint);
+    this.#endTargetPx = convertTargetOption2Px(
+      this.#triggerElemet,
+      endTriggerPoint
+    );
 
     // コールバックの作成
     this.#startCallbacks = useIntersectionCallback({
@@ -97,14 +95,7 @@ export class SimpleScrollTrigger {
     // 閾値の配列作成
     const threshold = [0, 1];
 
-    const startViewPortPx = convertViewPortOption2Px(this.#startViewPortPoint);
-    const startTargetPx = convertTargetOption2Px(
-      this.#triggerElemet,
-      this.#startTriggerPoint
-    );
-    if (startTargetPx === undefined) {
-      return;
-    }
+    
 
     this.#startObserver = new IntersectionObserver(
       (entries: IntersectionObserverEntry[]) => {
@@ -118,8 +109,8 @@ export class SimpleScrollTrigger {
         }
       },
       {
-        rootMargin: `${startTargetPx + startViewPortPx}px 0px ${-(
-          startTargetPx + startViewPortPx
+        rootMargin: `${this.#startTargetPx + this.#startViewPortPx}px 0px ${-(
+          this.#startTargetPx + this.#startViewPortPx
         )}px`,
         threshold: threshold,
       }
@@ -129,21 +120,12 @@ export class SimpleScrollTrigger {
 
     // 終点のオブザーバー
     if (
-      this.#endViewPortPoint === undefined &&
-      this.#endTriggerPoint === undefined
+      this.#endViewPortPx === undefined &&
+      this.#endTargetPx === undefined
     ) {
       return;
     }
 
-    const endViewPortPx = convertViewPortOption2Px(this.#endViewPortPoint);
-    const endTargetPx = convertTargetOption2Px(
-      this.#triggerElemet,
-      this.#endTriggerPoint
-    );
-
-    if (endTargetPx === undefined) {
-      return;
-    }
     this.#endObserver = new IntersectionObserver(
       (entries: IntersectionObserverEntry[]) => {
         if (!this.#endCallbacks) {
@@ -157,8 +139,8 @@ export class SimpleScrollTrigger {
         }
       },
       {
-        rootMargin: `${endViewPortPx + endTargetPx}px 0px ${-(
-          endViewPortPx + endTargetPx
+        rootMargin: `${this.#endViewPortPx + this.#endTargetPx}px 0px ${-(
+          this.#endViewPortPx + this.#endTargetPx
         )}px`,
         threshold: threshold,
       }
