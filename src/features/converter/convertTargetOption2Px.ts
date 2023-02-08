@@ -1,4 +1,4 @@
-import { PointOption } from "../types/PointOption";
+import { PointOption } from "../../types/PointOption";
 
 /**
  * 位置指定オプションからビューポートの位置に変換します

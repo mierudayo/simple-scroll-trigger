@@ -1,8 +1,7 @@
 import { useIntersectionCallback } from "./callback/IntersectionCallback";
-import { convertTargetOption2Px } from "./converter/convertTargetOption2Px";
-import { convertViewPortOption2Px } from "./converter/convertViewPortOption2Px";
+import { convertTargetOption2Px } from "./features/converter/convertTargetOption2Px";
+import { convertViewPortOption2Px } from "./features/converter/convertViewPortOption2Px";
 import { Options } from "./types/Options";
-import { PointOption } from "./types/PointOption";
 
 type CallBack = {
   callback: (entries: IntersectionObserverEntry[]) => void;
@@ -26,6 +25,8 @@ export class SimpleScrollTrigger {
 
   #isOnce: boolean = false;
 
+  #shouldMakeEndIntersection: boolean = false;
+
   constructor({
     trigger,
     onEnter,
@@ -37,6 +38,7 @@ export class SimpleScrollTrigger {
     endViewPortPoint,
     endTriggerPoint,
     once,
+    isInitOnEnter
   }: Options) {
     if (!trigger) {
       console.warn("Trigger element is Null");
@@ -64,14 +66,17 @@ export class SimpleScrollTrigger {
       forwardCallback: onEnter,
       backCallback: onLeaveBack,
       isOnce: this.#isOnce,
+      isInitOnEnter
     });
 
     this.#endCallbacks = useIntersectionCallback({
       forwardCallback: onLeave,
       backCallback: onEnterBack,
       isOnce: this.#isOnce,
+      isInitOnEnter: false,
     });
 
+    this.#shouldMakeEndIntersection = Boolean(onLeave) || Boolean(onEnterBack);
     this.#setupObserver();
 
     // リサイズしたら再セットアップします。
@@ -95,8 +100,6 @@ export class SimpleScrollTrigger {
     // 閾値の配列作成
     const threshold = [0, 1];
 
-    
-
     this.#startObserver = new IntersectionObserver(
       (entries: IntersectionObserverEntry[]) => {
         if (!this.#startCallbacks) {
@@ -119,10 +122,8 @@ export class SimpleScrollTrigger {
     this.#startObserver.observe(this.#triggerElemet);
 
     // 終点のオブザーバー
-    if (
-      this.#endViewPortPx === undefined &&
-      this.#endTargetPx === undefined
-    ) {
+    if (!this.#shouldMakeEndIntersection) {
+      // 終点の設定がない場合は作らない
       return;
     }
 

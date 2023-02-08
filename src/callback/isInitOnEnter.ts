@@ -1,3 +1,3 @@
-export const isInitOnEnter =(entries: IntersectionObserverEntry[])=>{
-  console.log(entries[0])
-}
+export const isInitOnEnter = (entries: IntersectionObserverEntry[]) => {
+  console.log(entries[0]);
+};

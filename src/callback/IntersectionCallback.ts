@@ -7,8 +7,8 @@ type Arg = {
   forwardCallback: Callback;
   backCallback: Callback;
   isOnce: boolean;
-  isInitOnEnter?:boolean;
-  startTriggerPoint?:string
+  isInitOnEnter?: boolean;
+  startTriggerPoint?: string;
 };
 
 /**
@@ -18,6 +18,7 @@ export const useIntersectionCallback = ({
   forwardCallback,
   backCallback,
   isOnce,
+  isInitOnEnter,
 }: Arg) => {
   const isEntered = data<boolean>(false);
   const isForwardCalled = data<boolean>(false);
@@ -29,10 +30,23 @@ export const useIntersectionCallback = ({
     // 判定範囲の矩形のy座標とトリガー要素のy座標。入った時はこの差は必ずマイナスになる。
     const rectY =
       (entries[0].rootBounds?.y ?? 0) - entries[0].boundingClientRect.y;
+    console.log(rectY);
     if (!isForwardCalled.value) {
-      if (!isInitCalled.value) {
-        console.log("init");
-        isInitOnEnter(entries)
+      if (
+        !isInitCalled.value &&
+        isInitOnEnter &&
+        entries[0].rootBounds &&
+        forwardCallback
+      ) {
+        // 初回のコールバック
+        console.log("init", entries[0].rootBounds?.height + rectY);
+        // 開始位置を過ぎていたら、実行
+        if (entries[0].rootBounds.height + rectY > 0) {
+          if (isOnce) {
+            isForwardCalled.value = true;
+          }
+          forwardCallback();
+        }
         isInitCalled.value = true;
       } else {
         // 交差判定があり、y座標の差がマイナスの時は入ったときのコールバックを呼ぶ

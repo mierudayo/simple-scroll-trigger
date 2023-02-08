@@ -24,4 +24,6 @@ export type Options = {
   endTriggerPoint?: number | PointOption;
   /** コールバックの実行を1度だけにするか */
   once?: boolean;
+  /** 読み込み時にonEnter判定をするか */
+  isInitOnEnter?:boolean
 };
