@@ -1,5 +1,4 @@
 import { data } from "../utils/data";
-import { isInitOnEnter } from "./isInitOnEnter";
 
 type Callback = (() => void) | undefined;
 
@@ -30,52 +29,46 @@ export const useIntersectionCallback = ({
     // 判定範囲の矩形のy座標とトリガー要素のy座標。入った時はこの差は必ずマイナスになる。
     const rectY =
       (entries[0].rootBounds?.y ?? 0) - entries[0].boundingClientRect.y;
-    console.log(rectY);
-    if (!isForwardCalled.value) {
-      if (
-        !isInitCalled.value &&
-        isInitOnEnter &&
-        entries[0].rootBounds &&
-        forwardCallback
-      ) {
-        // 初回のコールバック
-        console.log("init", entries[0].rootBounds?.height + rectY);
-        // 開始位置を過ぎていたら、実行
-        if (entries[0].rootBounds.height + rectY > 0) {
-          if (isOnce) {
-            isForwardCalled.value = true;
-          }
-          forwardCallback();
-        }
-        isInitCalled.value = true;
-      } else {
-        // 交差判定があり、y座標の差がマイナスの時は入ったときのコールバックを呼ぶ
-        if (entries[0].isIntersecting && rectY < 0) {
-          // 初めて入ったときに入域済みフラグをたてる
-          if (isEntered.value === false) {
-            isEntered.value = true;
-          }
-          if (forwardCallback) {
-            // isOnceが有効な場合に呼ばれたらフラグを建てる
-            if (isOnce) {
-              isForwardCalled.value = true;
-            }
-
-            forwardCallback();
-          }
+    // 初回コールバックの処理
+    if (!isInitCalled.value) {
+      isInitCalled.value = true;
+      if (!entries[0].rootBounds || !forwardCallback || !isInitOnEnter) {
+        return;
+      }
+      // 開始位置を過ぎていたら、実行
+      if (entries[0].rootBounds.height + rectY > 0) {
+        // 初めて入ったときに入域済みフラグをたてる
+        isEntered.value = true;
+        forwardCallback();
+        if (isOnce) {
+          isForwardCalled.value = true;
         }
       }
+      return;
     }
-    if (!isBackCalled.value) {
+    if (!isForwardCalled.value && forwardCallback) {
+      // 交差判定があり、y座標の差がマイナスの時は入ったときのコールバックを呼ぶ
+      if (entries[0].isIntersecting && rectY < 0) {
+        // 初めて入ったときに入域済みフラグをたてる
+        if (isEntered.value === false) {
+          isEntered.value = true;
+        }
+        // isOnceが有効な場合に呼ばれたらフラグを建てる
+        if (isOnce) {
+          isForwardCalled.value = true;
+        }
+
+        forwardCallback();
+      }
+    }
+    if (!isBackCalled.value && backCallback) {
       // 交差判定がなく、y座標の差がマイナスの時は入ったとき、さらに入域済みフラグがある場合は出ていったときのコールバックを呼ぶ
       if (!entries[0].isIntersecting && rectY < 0 && isEntered.value) {
-        if (backCallback) {
-          // isOnceが有効な場合に呼ばれたらフラグを建てる
-          if (isOnce) {
-            isBackCalled.value = true;
-          }
-          backCallback();
+        // isOnceが有効な場合に呼ばれたらフラグを建てる
+        if (isOnce) {
+          isBackCalled.value = true;
         }
+        backCallback();
       }
     }
   };
