@@ -1,5 +1,11 @@
 import { PointOption } from "./PointOption";
 
+/** 読み込み時にonEnter判定のオプションです */
+export type InitOnEnterOption = {
+  /** onEnterの判定範囲です。endTriggerは位置がstart判定からend判定の場合にコールバックを呼びます。allの場合はstart判定を超えていたら呼びます */
+  range: "endTrigger" | "all";
+};
+
 /**
  * 設定内容
  */
@@ -25,5 +31,5 @@ export type Options = {
   /** コールバックの実行を1度だけにするか */
   once?: boolean;
   /** 読み込み時にonEnter判定をするか */
-  isInitOnEnter?: boolean;
+  initOnEnter?: boolean | InitOnEnterOption;
 };

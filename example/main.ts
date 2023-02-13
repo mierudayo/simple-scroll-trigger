@@ -28,8 +28,8 @@ document.addEventListener("DOMContentLoaded", () => {
     startViewPortPoint: { value: 90, unit: "%" },
     startTriggerPoint: { value: 200, unit: "px" },
     endViewPortPoint: { value: 50, unit: "%" },
-    endTriggerPoint: { value: 100, unit: "%" },
-    once: true,
-    isInitOnEnter:true
+    endTriggerPoint: { value: 90, unit: "%" },
+    // once: true,
+    initOnEnter:{range:"endTrigger"}
   });
 });

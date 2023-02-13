@@ -1,3 +1,4 @@
+import { InitOnEnterOption } from "../types/Options";
 import { data } from "../utils/data";
 
 type Callback = (() => void) | undefined;
@@ -6,8 +7,9 @@ type Arg = {
   forwardCallback: Callback;
   backCallback: Callback;
   isOnce: boolean;
-  isInitOnEnter?: boolean;
-  startTriggerPoint?: string;
+  initOnEnter?: InitOnEnterOption;
+  endViewPortPx?: number;
+  endTargetPx?: number;
 };
 
 /**
@@ -17,13 +19,23 @@ export const useIntersectionCallback = ({
   forwardCallback,
   backCallback,
   isOnce,
-  isInitOnEnter,
+  initOnEnter,
+  endViewPortPx,
+  endTargetPx,
 }: Arg) => {
   const isEntered = data<boolean>(false);
   const isForwardCalled = data<boolean>(false);
   const isBackCalled = data<boolean>(false);
 
   const isInitCalled = data<boolean>(false);
+
+  const checkInitOption = (initOption: true | InitOnEnterOption) => {
+    if (initOption === true) {
+      return "all";
+    } else {
+      return initOption.range;
+    }
+  };
 
   const callback = (entries: IntersectionObserverEntry[]) => {
     // 判定範囲の矩形のy座標とトリガー要素のy座標。入った時はこの差は必ずマイナスになる。
@@ -32,16 +44,49 @@ export const useIntersectionCallback = ({
     // 初回コールバックの処理
     if (!isInitCalled.value) {
       isInitCalled.value = true;
-      if (!entries[0].rootBounds || !forwardCallback || !isInitOnEnter) {
+      // 設定が無効な場合はリターン
+      if (!entries[0].rootBounds || !forwardCallback || !initOnEnter) {
         return;
       }
-      // 開始位置を過ぎていたら、実行
-      if (entries[0].rootBounds.height + rectY > 0) {
+      const range = checkInitOption(initOnEnter);
+
+      console.log(endViewPortPx, endTargetPx, entries[0].boundingClientRect);
+
+      // 開始位置を過ぎているか
+      const isOverStartLine = entries[0].rootBounds.height + rectY > 0;
+
+      // 判定範囲が全域の場合
+      if (range === "all" && isOverStartLine) {
         // 初めて入ったときに入域済みフラグをたてる
         isEntered.value = true;
         forwardCallback();
         if (isOnce) {
           isForwardCalled.value = true;
+        }
+        return;
+      }
+      // 判定範囲がendまでの場合
+      if (
+        range === "endTrigger" &&
+        endTargetPx &&
+        endViewPortPx &&
+        isOverStartLine
+      ) {
+        console.log(
+          entries[0].boundingClientRect.top + endTargetPx - endViewPortPx
+        );
+        // 終了位置を過ぎているか
+        const isOverEndLine =
+          entries[0].boundingClientRect.top + endTargetPx - endViewPortPx < 0;
+        if (isOverStartLine && !isOverEndLine) {
+          // 開始位置を過ぎ、終了位置手前だったら実行
+          // 初めて入ったときに入域済みフラグをたてる
+          isEntered.value = true;
+          forwardCallback();
+          if (isOnce) {
+            isForwardCalled.value = true;
+          }
+          return;
         }
       }
       return;

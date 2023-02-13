@@ -38,7 +38,7 @@ export class SimpleScrollTrigger {
     endViewPortPoint,
     endTriggerPoint,
     once,
-    isInitOnEnter
+    initOnEnter,
   }: Options) {
     if (!trigger) {
       console.warn("Trigger element is Null");
@@ -46,6 +46,9 @@ export class SimpleScrollTrigger {
     }
     this.#triggerElemet = trigger;
     this.#isOnce = Boolean(once);
+
+    this.#shouldMakeEndIntersection = Boolean(onLeave) || Boolean(onEnterBack);
+
 
     // 始点の設定
     this.#startViewPortPx = convertViewPortOption2Px(startViewPortPoint);
@@ -66,17 +69,22 @@ export class SimpleScrollTrigger {
       forwardCallback: onEnter,
       backCallback: onLeaveBack,
       isOnce: this.#isOnce,
-      isInitOnEnter
+      initOnEnter,
+      endTargetPx: this.#shouldMakeEndIntersection
+        ? this.#endTargetPx
+        : undefined,
+      endViewPortPx: this.#shouldMakeEndIntersection
+        ? this.#endViewPortPx
+        : undefined,
     });
 
     this.#endCallbacks = useIntersectionCallback({
       forwardCallback: onLeave,
       backCallback: onEnterBack,
       isOnce: this.#isOnce,
-      isInitOnEnter: false,
+      initOnEnter: false,
     });
 
-    this.#shouldMakeEndIntersection = Boolean(onLeave) || Boolean(onEnterBack);
     this.#setupObserver();
 
     // リサイズしたら再セットアップします。
