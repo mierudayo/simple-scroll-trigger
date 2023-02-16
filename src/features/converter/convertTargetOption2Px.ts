@@ -6,7 +6,7 @@ import { PointOption } from "../../types/PointOption";
 export const convertTargetOption2Px = (
   element: Element,
   option: number | PointOption | undefined
-):number => {
+): number => {
   const targetElementHeight = element.clientHeight;
   if (option === undefined) {
     return 0;

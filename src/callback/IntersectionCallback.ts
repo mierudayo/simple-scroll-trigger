@@ -7,7 +7,7 @@ type Arg = {
   forwardCallback: Callback;
   backCallback: Callback;
   isOnce: boolean;
-  initOnEnter?: InitOnEnterOption;
+  initOnEnter?: InitOnEnterOption | boolean;
   endViewPortPx?: number;
   endTargetPx?: number;
 };
@@ -26,8 +26,7 @@ export const useIntersectionCallback = ({
   const isEntered = data<boolean>(false);
   const isForwardCalled = data<boolean>(false);
   const isBackCalled = data<boolean>(false);
-
-  const isInitCalled = data<boolean>(false);
+  let isInitCalled = false;
 
   const checkInitOption = (initOption: true | InitOnEnterOption) => {
     if (initOption === true) {
@@ -42,8 +41,8 @@ export const useIntersectionCallback = ({
     const rectY =
       (entries[0].rootBounds?.y ?? 0) - entries[0].boundingClientRect.y;
     // 初回コールバックの処理
-    if (!isInitCalled.value) {
-      isInitCalled.value = true;
+    if (!isInitCalled) {
+      isInitCalled = true;
       // 設定が無効な場合はリターン
       if (!entries[0].rootBounds || !forwardCallback || !initOnEnter) {
         return;

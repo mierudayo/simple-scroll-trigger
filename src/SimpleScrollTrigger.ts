@@ -17,15 +17,15 @@ export class SimpleScrollTrigger {
   #startObserver: IntersectionObserver | null = null;
   #endObserver: IntersectionObserver | null = null;
 
-  #startViewPortPx: number = 0;
-  #startTargetPx: number = 0;
+  #startViewPortPx = 0;
+  #startTargetPx = 0;
 
-  #endViewPortPx: number = 0;
-  #endTargetPx: number = 0;
+  #endViewPortPx = 0;
+  #endTargetPx = 0;
 
-  #isOnce: boolean = false;
+  #isOnce = false;
 
-  #shouldMakeEndIntersection: boolean = false;
+  #shouldMakeEndIntersection = false;
 
   constructor({
     trigger,
@@ -48,7 +48,6 @@ export class SimpleScrollTrigger {
     this.#isOnce = Boolean(once);
 
     this.#shouldMakeEndIntersection = Boolean(onLeave) || Boolean(onEnterBack);
-
 
     // 始点の設定
     this.#startViewPortPx = convertViewPortOption2Px(startViewPortPoint);
@@ -92,7 +91,29 @@ export class SimpleScrollTrigger {
       this.disconnectObserve();
       this.#startObserver = null;
       this.#endObserver = null;
+
       if (!this.#isSetupPrevented) {
+        this.#startCallbacks = null;
+        this.#endCallbacks = null;
+        this.#startCallbacks = useIntersectionCallback({
+          forwardCallback: onEnter,
+          backCallback: onLeaveBack,
+          isOnce: this.#isOnce,
+          initOnEnter,
+          endTargetPx: this.#shouldMakeEndIntersection
+            ? this.#endTargetPx
+            : undefined,
+          endViewPortPx: this.#shouldMakeEndIntersection
+            ? this.#endViewPortPx
+            : undefined,
+        });
+
+        this.#endCallbacks = useIntersectionCallback({
+          forwardCallback: onLeave,
+          backCallback: onEnterBack,
+          isOnce: this.#isOnce,
+          initOnEnter: false,
+        });
         this.#setupObserver();
       }
     });
