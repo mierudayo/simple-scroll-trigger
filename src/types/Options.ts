@@ -34,6 +34,6 @@ export type Options = {
   /** コールバックの実行を1度だけにするか */
   once?: boolean;
   /** 読み込み時にonEnter判定をするか */
-  initOnEnter?: InitOnCallOption;
+  initOnEnter?: InitOnCallOption | boolean;
   initOnLeave?: boolean;
 };

@@ -30,6 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
     endViewPortPoint: { value: 50, unit: "%" },
     endTriggerPoint: { value: 90, unit: "%" },
     // once: true,
-    initOnEnter:{range:"endTrigger"}
+    initOnEnter:{range:"endTrigger"},
+    initOnLeave: true,
   });
 });

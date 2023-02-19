@@ -1,4 +1,6 @@
+import { checkInitOption } from "./callback/initCallback";
 import { useIntersectionCallback } from "./callback/IntersectionCallback";
+import { checkEndInitOption } from "./features/checker/checkEndInitOption";
 import { convertTargetOption2Px } from "./features/converter/convertTargetOption2Px";
 import { convertViewPortOption2Px } from "./features/converter/convertViewPortOption2Px";
 import { Callback, InitOnCallOption, Options } from "./types/Options";
@@ -37,7 +39,8 @@ export class SimpleScrollTrigger {
 
   #isOnce = false;
 
-  #initOnEnter: InitOnCallOption | undefined = undefined;
+  #initOnEnter: boolean | InitOnCallOption | undefined = undefined;
+  #initOnLeave: boolean | undefined = undefined;
 
   #shouldMakeEndIntersection = false;
 
@@ -53,6 +56,7 @@ export class SimpleScrollTrigger {
     endTriggerPoint,
     once,
     initOnEnter,
+    initOnLeave,
   }: Options) {
     if (!trigger) {
       console.warn("Trigger element is Null");
@@ -74,6 +78,7 @@ export class SimpleScrollTrigger {
     this.#onEnterBack = onEnterBack;
 
     this.#initOnEnter = initOnEnter;
+    this.#initOnLeave = initOnLeave;
 
     this.#setupObserver();
 
@@ -84,8 +89,6 @@ export class SimpleScrollTrigger {
       this.#endObserver = null;
 
       if (!this.#isSetupPrevented) {
-
-      
         this.#setupObserver();
       }
     });
@@ -117,7 +120,7 @@ export class SimpleScrollTrigger {
       forwardCallback: this.#onEnter,
       backCallback: this.#onLeaveBack,
       isOnce: this.#isOnce,
-      initOnEnter: this.#initOnEnter,
+      initCall: this.#initOnEnter,
       endTargetPx: this.#shouldMakeEndIntersection
         ? this.#endTargetPx
         : undefined,
@@ -126,11 +129,16 @@ export class SimpleScrollTrigger {
         : undefined,
     });
 
+    let endInitOption = checkEndInitOption(
+      this.#initOnEnter,
+      this.#initOnLeave
+    );
+
     this.#endCallbacks = useIntersectionCallback({
       forwardCallback: this.#onLeave,
       backCallback: this.#onEnterBack,
       isOnce: this.#isOnce,
-      initOnEnter: false,
+      initCall: endInitOption,
     });
     // 閾値の配列作成
     const threshold = [0, 1];

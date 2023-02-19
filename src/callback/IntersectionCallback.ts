@@ -6,7 +6,7 @@ type Arg = {
   forwardCallback: Callback;
   backCallback: Callback;
   isOnce: boolean;
-  initOnEnter?: InitOnCallOption | boolean;
+  initCall?: InitOnCallOption | boolean;
   endViewPortPx?: number;
   endTargetPx?: number;
 };
@@ -18,7 +18,7 @@ export const useIntersectionCallback = ({
   forwardCallback,
   backCallback,
   isOnce,
-  initOnEnter,
+  initCall,
   endViewPortPx,
   endTargetPx,
 }: Arg) => {
@@ -37,7 +37,7 @@ export const useIntersectionCallback = ({
       initCallback({
         entries,
         forwardCallback,
-        initCall: initOnEnter,
+        initCall,
         endViewPortPx,
         endTargetPx,
         isOnce,
