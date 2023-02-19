@@ -1,7 +1,8 @@
 import { useIntersectionCallback } from "./callback/IntersectionCallback";
 import { convertTargetOption2Px } from "./features/converter/convertTargetOption2Px";
 import { convertViewPortOption2Px } from "./features/converter/convertViewPortOption2Px";
-import { Options } from "./types/Options";
+import { Callback, InitOnCallOption, Options } from "./types/Options";
+import { PointOption } from "./types/PointOption";
 
 type CallBack = {
   callback: (entries: IntersectionObserverEntry[]) => void;
@@ -10,6 +11,17 @@ type CallBack = {
 
 export class SimpleScrollTrigger {
   #triggerElemet: Element | null = null;
+
+  #startViewPortPoint: number | PointOption | undefined = undefined;
+  #startTriggerPoint: number | PointOption | undefined = undefined;
+
+  #endViewPortPoint: number | PointOption | undefined = undefined;
+  #endTriggerPoint: number | PointOption | undefined = undefined;
+
+  #onEnter: Callback | undefined = undefined;
+  #onLeaveBack: Callback | undefined = undefined;
+  #onLeave: Callback | undefined = undefined;
+  #onEnterBack: Callback | undefined = undefined;
 
   #startCallbacks: CallBack | null = null;
   #endCallbacks: CallBack | null = null;
@@ -24,6 +36,8 @@ export class SimpleScrollTrigger {
   #endTargetPx = 0;
 
   #isOnce = false;
+
+  #initOnEnter: InitOnCallOption | undefined = undefined;
 
   #shouldMakeEndIntersection = false;
 
@@ -49,40 +63,17 @@ export class SimpleScrollTrigger {
 
     this.#shouldMakeEndIntersection = Boolean(onLeave) || Boolean(onEnterBack);
 
-    // 始点の設定
-    this.#startViewPortPx = convertViewPortOption2Px(startViewPortPoint);
-    this.#startTargetPx = convertTargetOption2Px(
-      this.#triggerElemet,
-      startTriggerPoint
-    );
+    this.#startViewPortPoint = startViewPortPoint;
+    this.#startTriggerPoint = startTriggerPoint;
+    this.#endViewPortPoint = endViewPortPoint;
+    this.#endTriggerPoint = endTriggerPoint;
 
-    // 終点の指定
-    this.#endViewPortPx = convertViewPortOption2Px(endViewPortPoint);
-    this.#endTargetPx = convertTargetOption2Px(
-      this.#triggerElemet,
-      endTriggerPoint
-    );
+    this.#onEnter = onEnter;
+    this.#onLeaveBack = onLeaveBack;
+    this.#onLeave = onLeave;
+    this.#onEnterBack = onEnterBack;
 
-    // コールバックの作成
-    this.#startCallbacks = useIntersectionCallback({
-      forwardCallback: onEnter,
-      backCallback: onLeaveBack,
-      isOnce: this.#isOnce,
-      initOnEnter,
-      endTargetPx: this.#shouldMakeEndIntersection
-        ? this.#endTargetPx
-        : undefined,
-      endViewPortPx: this.#shouldMakeEndIntersection
-        ? this.#endViewPortPx
-        : undefined,
-    });
-
-    this.#endCallbacks = useIntersectionCallback({
-      forwardCallback: onLeave,
-      backCallback: onEnterBack,
-      isOnce: this.#isOnce,
-      initOnEnter: false,
-    });
+    this.#initOnEnter = initOnEnter;
 
     this.#setupObserver();
 
@@ -93,27 +84,8 @@ export class SimpleScrollTrigger {
       this.#endObserver = null;
 
       if (!this.#isSetupPrevented) {
-        this.#startCallbacks = null;
-        this.#endCallbacks = null;
-        this.#startCallbacks = useIntersectionCallback({
-          forwardCallback: onEnter,
-          backCallback: onLeaveBack,
-          isOnce: this.#isOnce,
-          initOnEnter,
-          endTargetPx: this.#shouldMakeEndIntersection
-            ? this.#endTargetPx
-            : undefined,
-          endViewPortPx: this.#shouldMakeEndIntersection
-            ? this.#endViewPortPx
-            : undefined,
-        });
 
-        this.#endCallbacks = useIntersectionCallback({
-          forwardCallback: onLeave,
-          backCallback: onEnterBack,
-          isOnce: this.#isOnce,
-          initOnEnter: false,
-        });
+      
         this.#setupObserver();
       }
     });
@@ -126,6 +98,40 @@ export class SimpleScrollTrigger {
     if (!this.#triggerElemet) {
       return;
     }
+    // 始点の設定
+    this.#startViewPortPx = convertViewPortOption2Px(this.#startViewPortPoint);
+    this.#startTargetPx = convertTargetOption2Px(
+      this.#triggerElemet,
+      this.#startTriggerPoint
+    );
+
+    // 終点の指定
+    this.#endViewPortPx = convertViewPortOption2Px(this.#endViewPortPoint);
+    this.#endTargetPx = convertTargetOption2Px(
+      this.#triggerElemet,
+      this.#endTriggerPoint
+    );
+
+    // コールバックの作成
+    this.#startCallbacks = useIntersectionCallback({
+      forwardCallback: this.#onEnter,
+      backCallback: this.#onLeaveBack,
+      isOnce: this.#isOnce,
+      initOnEnter: this.#initOnEnter,
+      endTargetPx: this.#shouldMakeEndIntersection
+        ? this.#endTargetPx
+        : undefined,
+      endViewPortPx: this.#shouldMakeEndIntersection
+        ? this.#endViewPortPx
+        : undefined,
+    });
+
+    this.#endCallbacks = useIntersectionCallback({
+      forwardCallback: this.#onLeave,
+      backCallback: this.#onEnterBack,
+      isOnce: this.#isOnce,
+      initOnEnter: false,
+    });
     // 閾値の配列作成
     const threshold = [0, 1];
 
