@@ -48,9 +48,6 @@ export const initCallback = ({
     }
     return;
   }
-  console.log(
-    range === "endTrigger" && endTargetPx && endViewPortPx && isOverStartLine
-  );
 
   // 判定範囲がendまでの場合
   if (
@@ -61,11 +58,27 @@ export const initCallback = ({
   ) {
     // 終了位置を過ぎているか
     const isOverEndLine =
-      entries[0].boundingClientRect.top + endTargetPx - endViewPortPx < 0;
+      entries[0].boundingClientRect.top +
+        endTargetPx -
+        window.innerHeight +
+        endViewPortPx <
+      0;
+    console.log(
+      range,
+      endTargetPx,
+      endViewPortPx,
+      isOverStartLine,
+      entries[0].boundingClientRect.top,
+      entries[0].boundingClientRect.top +
+        endTargetPx -
+        window.innerHeight +
+        endViewPortPx
+    );
     if (isOverStartLine && !isOverEndLine) {
       // 開始位置を過ぎ、終了位置手前だったら実行
       // 初めて入ったときに入域済みフラグをたてる
       isEntered.value = true;
+      console.log("exe");
       forwardCallback();
       if (isOnce) {
         isForwardCalled.value = true;
