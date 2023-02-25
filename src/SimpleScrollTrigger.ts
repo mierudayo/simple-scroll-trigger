@@ -222,8 +222,8 @@ export class SimpleScrollTrigger {
   get #isSetupPrevented(): boolean {
     return (
       this.#isOnce &&
-      Boolean(this.#startCallbacks?.isAllCalled) &&
-      Boolean(this.#endCallbacks?.isAllCalled)
+      Boolean(this.#startCallbacks?.isAllCalled()) &&
+      Boolean(this.#endCallbacks?.isAllCalled())
     );
   }
 }
