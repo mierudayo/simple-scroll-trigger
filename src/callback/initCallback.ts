@@ -10,6 +10,8 @@ type Arg = {
   isOnce: boolean;
   isEntered: Data<boolean>;
   isForwardCalled: Data<boolean>;
+  lastCalled: Data<"forward" | "back" | null>;
+  lastEndCalled?: "onLeave" | "onEnterBack" | null;
 };
 
 /**
@@ -24,11 +26,18 @@ export const initCallback = ({
   isOnce,
   isEntered,
   isForwardCalled,
+  lastCalled,
+  lastEndCalled,
 }: Arg) => {
   // 設定が無効な場合はリターン
   if (!entries[0].rootBounds || !forwardCallback || !initOnEnter) {
     return;
   }
+  // onEneterBackが呼ばれていたときには実行しない（リサイズ時対策）
+  if (lastEndCalled === "onEnterBack") {
+    return;
+  }
+  console.log("init");
   const rectY =
     (entries[0].rootBounds?.y ?? 0) - entries[0].boundingClientRect.y;
   const range = checkInitOption(initOnEnter);
@@ -43,6 +52,7 @@ export const initCallback = ({
     // 初めて入ったときに入域済みフラグをたてる
     isEntered.value = true;
     forwardCallback();
+    lastCalled.value = "forward";
     if (isOnce) {
       isForwardCalled.value = true;
     }
@@ -63,23 +73,12 @@ export const initCallback = ({
         window.innerHeight +
         endViewPortPx <
       0;
-    console.log(
-      range,
-      endTargetPx,
-      endViewPortPx,
-      isOverStartLine,
-      entries[0].boundingClientRect.top,
-      entries[0].boundingClientRect.top +
-        endTargetPx -
-        window.innerHeight +
-        endViewPortPx
-    );
     if (isOverStartLine && !isOverEndLine) {
       // 開始位置を過ぎ、終了位置手前だったら実行
       // 初めて入ったときに入域済みフラグをたてる
       isEntered.value = true;
-      console.log("exe");
       forwardCallback();
+      lastCalled.value = "forward";
       if (isOnce) {
         isForwardCalled.value = true;
       }

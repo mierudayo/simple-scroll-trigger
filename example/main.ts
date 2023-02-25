@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
     startTriggerPoint: { value: 200, unit: "px" },
     endViewPortPoint: { value: 50, unit: "%" },
     endTriggerPoint: { value: 90, unit: "%" },
-    // once: true,
+    once: true,
     initOnEnter:{range:"endTrigger"},
     initOnLeave: true,
   });

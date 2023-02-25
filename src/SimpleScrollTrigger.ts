@@ -1,4 +1,3 @@
-import { checkInitOption } from "./callback/initCallback";
 import { useIntersectionCallback } from "./callback/IntersectionCallback";
 import { checkEndInitOption } from "./features/checker/checkEndInitOption";
 import { convertTargetOption2Px } from "./features/converter/convertTargetOption2Px";
@@ -9,6 +8,7 @@ import { PointOption } from "./types/PointOption";
 type CallBack = {
   callback: (entries: IntersectionObserverEntry[]) => void;
   isAllCalled: () => boolean;
+  getLastCalled: () => "forward" | "back" | null;
 };
 
 export class SimpleScrollTrigger {
@@ -44,6 +44,8 @@ export class SimpleScrollTrigger {
 
   #shouldMakeEndIntersection = false;
 
+  #lastStartCalled: "onEnter" | "onLeaveBack" | null = null;
+  #lastEndCalled: "onLeave" | "onEnterBack" | null = null;
   constructor({
     trigger,
     onEnter,
@@ -105,14 +107,14 @@ export class SimpleScrollTrigger {
     this.#startViewPortPx = convertViewPortOption2Px(this.#startViewPortPoint);
     this.#startTargetPx = convertTargetOption2Px(
       this.#triggerElemet,
-      this.#startTriggerPoint
+      this.#startTriggerPoint,
     );
 
     // 終点の指定
     this.#endViewPortPx = convertViewPortOption2Px(this.#endViewPortPoint);
     this.#endTargetPx = convertTargetOption2Px(
       this.#triggerElemet,
-      this.#endTriggerPoint
+      this.#endTriggerPoint,
     );
 
     // コールバックの作成
@@ -121,17 +123,14 @@ export class SimpleScrollTrigger {
       backCallback: this.#onLeaveBack,
       isOnce: this.#isOnce,
       initCall: this.#initOnEnter,
-      endTargetPx: this.#shouldMakeEndIntersection
-        ? this.#endTargetPx
-        : undefined,
-      endViewPortPx: this.#shouldMakeEndIntersection
-        ? this.#endViewPortPx
-        : undefined,
+      endTargetPx: this.#endTargetPx,
+      endViewPortPx: this.#endViewPortPx,
+      lastEndCalled: this.#lastEndCalled,
     });
 
-    let endInitOption = checkEndInitOption(
+    const endInitOption = checkEndInitOption(
       this.#initOnEnter,
-      this.#initOnLeave
+      this.#initOnLeave,
     );
 
     this.#endCallbacks = useIntersectionCallback({
@@ -149,6 +148,14 @@ export class SimpleScrollTrigger {
           return;
         }
         this.#startCallbacks.callback(entries);
+        if (this.#startCallbacks.getLastCalled() === "forward") {
+          this.#lastStartCalled = "onEnter";
+        } else if (this.#startCallbacks.getLastCalled() === "back") {
+          this.#lastStartCalled = "onLeaveBack";
+        } else {
+          this.#lastStartCalled = null;
+        }
+        console.log("lastS", this.#lastStartCalled);
         // onceフラグがあり、すべてのコールバックが呼ばれたら監視を停止する
         if (this.#isOnce && this.#startCallbacks.isAllCalled()) {
           this.#startObserver?.disconnect();
@@ -159,7 +166,7 @@ export class SimpleScrollTrigger {
           this.#startTargetPx + this.#startViewPortPx
         )}px`,
         threshold: threshold,
-      }
+      },
     );
 
     this.#startObserver.observe(this.#triggerElemet);
@@ -176,8 +183,16 @@ export class SimpleScrollTrigger {
           return;
         }
         this.#endCallbacks.callback(entries);
-        // onceフラグがあり、すべてのコールバックが呼ばれたら監視を停止する
+        if (this.#endCallbacks.getLastCalled() === "forward") {
+          this.#lastEndCalled = "onLeave";
+        } else if (this.#endCallbacks.getLastCalled() === "back") {
+          this.#lastEndCalled = "onEnterBack";
+        } else {
+          this.#lastEndCalled = null;
+        }
+        console.log("lastE", this.#lastEndCalled);
 
+        // onceフラグがあり、すべてのコールバックが呼ばれたら監視を停止する
         if (this.#isOnce && this.#endCallbacks.isAllCalled()) {
           this.#endObserver?.disconnect();
         }
@@ -187,7 +202,7 @@ export class SimpleScrollTrigger {
           this.#endViewPortPx + this.#endTargetPx
         )}px`,
         threshold: threshold,
-      }
+      },
     );
 
     this.#endObserver.observe(this.#triggerElemet);

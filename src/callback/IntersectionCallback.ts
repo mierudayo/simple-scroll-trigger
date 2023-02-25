@@ -9,6 +9,7 @@ type Arg = {
   initCall?: InitOnCallOption | boolean;
   endViewPortPx?: number;
   endTargetPx?: number;
+  lastEndCalled?: "onLeave" | "onEnterBack" | null;
 };
 
 /**
@@ -21,9 +22,11 @@ export const useIntersectionCallback = ({
   initCall,
   endViewPortPx,
   endTargetPx,
+  lastEndCalled,
 }: Arg) => {
   const isEntered = data<boolean>(false);
   const isForwardCalled = data<boolean>(false);
+  const lastCalled = data<"forward" | "back" | null>(null);
   let isBackCalled = false;
   let isInitCalled = false;
 
@@ -43,6 +46,8 @@ export const useIntersectionCallback = ({
         isOnce,
         isEntered,
         isForwardCalled,
+        lastCalled,
+        lastEndCalled,
       });
       return;
     }
@@ -59,6 +64,7 @@ export const useIntersectionCallback = ({
         }
 
         forwardCallback();
+        lastCalled.value = "forward";
       }
     }
     if (!isBackCalled && backCallback) {
@@ -69,6 +75,7 @@ export const useIntersectionCallback = ({
           isBackCalled = true;
         }
         backCallback();
+        lastCalled.value = "back";
       }
     }
   };
@@ -85,7 +92,9 @@ export const useIntersectionCallback = ({
     }
     return false;
   };
-  return { callback, isAllCalled };
+
+  const getLastCalled = () => lastCalled.value;
+  return { callback, isAllCalled, getLastCalled };
 };
 
 const whichCallbackEnabled = (forward: Callback, back: Callback) => {
