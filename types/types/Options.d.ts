@@ -1,4 +1,11 @@
 import { PointOption } from "./PointOption";
+/** 読み込み時にonEnter判定のオプションです */
+export declare type InitOnCallOption = {
+    /** onEnterの判定範囲です。endは位置がstart判定からend判定の場合にコールバックを呼びます。allの場合はstart判定を超えていたら呼びます */
+    range: "end" | "all";
+};
+/** 交差時に呼ばれるコールバック関数です */
+export declare type Callback = (() => void) | undefined;
 /**
  * 設定内容
  */
@@ -6,13 +13,13 @@ export declare type Options = {
     /** 交差対象の要素です */
     trigger: Element | null;
     /** 入ったときに呼ばれる関数です */
-    onEnter?: () => void;
+    onEnter?: Callback;
     /** 出戻ったときに呼ばれる関数です */
-    onLeaveBack?: () => void;
+    onLeaveBack?: Callback;
     /** 通過したときに呼ばれる関数です */
-    onLeave?: () => void;
+    onLeave?: Callback;
     /** 入り戻ったときに呼ばれる関数です */
-    onEnterBack?: () => void;
+    onEnterBack?: Callback;
     /** start判定基準となる画面上端からの距離です */
     startViewPortPoint?: number | PointOption;
     /** start判定基準となる要素上端からの距離です */
@@ -23,5 +30,9 @@ export declare type Options = {
     endTriggerPoint?: number | PointOption;
     /** コールバックの実行を1度だけにするか */
     once?: boolean;
+    /** 読み込み時にonEnter判定をするか */
+    initOnEnter?: InitOnCallOption | boolean;
+    /** 読み込み時にonLeave判定をするか */
+    initOnLeave?: boolean;
 };
 //# sourceMappingURL=Options.d.ts.map

@@ -44,6 +44,7 @@ export class SimpleScrollTrigger {
 
   #shouldMakeEndIntersection = false;
 
+  // @ts-ignore 現状呼び出しはないが将来的に残しておく
   #lastStartCalled: "onEnter" | "onLeaveBack" | null = null;
   #lastEndCalled: "onLeave" | "onEnterBack" | null = null;
 
