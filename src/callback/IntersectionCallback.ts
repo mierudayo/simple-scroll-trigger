@@ -68,8 +68,12 @@ export const useIntersectionCallback = ({
       }
     }
     if (!isBackCalled && backCallback) {
-      // 交差判定がなく、y座標の差がマイナスの時は入ったとき、さらに入域済みフラグがある場合は出ていったときのコールバックを呼ぶ
-      if (!entries[0].isIntersecting && rectY < 0 && isEntered.value) {
+      // 交差判定がなく、y座標の差がマイナスの時は入ったとき、さらにforward関数がある場合は入域済みフラグがある時に出ていったときのコールバックを呼ぶ
+      if (
+        !entries[0].isIntersecting &&
+        rectY < 0 &&
+        ((forwardCallback && isEntered.value) || !forwardCallback)
+      ) {
         // isOnceが有効な場合に呼ばれたらフラグを建てる
         if (isOnce) {
           isBackCalled = true;
