@@ -37,12 +37,9 @@ export const initCallback = ({
   if (lastEndCalled === "onEnterBack") {
     return;
   }
-  console.log("init");
   const rectY =
     (entries[0].rootBounds?.y ?? 0) - entries[0].boundingClientRect.y;
   const range = checkInitOption(initOnEnter);
-
-  console.log(endViewPortPx, endTargetPx, entries[0].boundingClientRect);
 
   // 開始位置を過ぎているか
   const isOverStartLine = entries[0].rootBounds.height + rectY > 0;

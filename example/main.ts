@@ -25,12 +25,12 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log("onEnterBack");
       textElement.textContent = "onEnterBack";
     },
-    startViewPortPoint: { value: 90, unit: "%" },
-    startTriggerPoint: { value: 200, unit: "px" },
-    endViewPortPoint: { value: 50, unit: "%" },
+    startViewPortPoint: { value: 10, unit: "%",from:"bottom" },
+    startTriggerPoint: { value: 800, unit: "px", from: "bottom" },
+    endViewPortPoint: { value: 50, unit: "%", from: "top" },
     endTriggerPoint: { value: 90, unit: "%" },
-    once: true,
-    initOnEnter:{range:"endTrigger"},
+    once: false,
+    initOnEnter: { range: "end" },
     initOnLeave: true,
   });
 });

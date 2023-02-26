@@ -46,7 +46,7 @@ export class SimpleScrollTrigger {
 
   #lastStartCalled: "onEnter" | "onLeaveBack" | null = null;
   #lastEndCalled: "onLeave" | "onEnterBack" | null = null;
-  
+
   constructor({
     trigger,
     onEnter,
@@ -156,7 +156,6 @@ export class SimpleScrollTrigger {
         } else {
           this.#lastStartCalled = null;
         }
-        console.log("lastS", this.#lastStartCalled);
         // onceフラグがあり、すべてのコールバックが呼ばれたら監視を停止する
         if (this.#isOnce && this.#startCallbacks.isAllCalled()) {
           this.#startObserver?.disconnect();
@@ -191,7 +190,6 @@ export class SimpleScrollTrigger {
         } else {
           this.#lastEndCalled = null;
         }
-        console.log("lastE", this.#lastEndCalled);
 
         // onceフラグがあり、すべてのコールバックが呼ばれたら監視を停止する
         if (this.#isOnce && this.#endCallbacks.isAllCalled()) {
