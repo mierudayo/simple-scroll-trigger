@@ -2,8 +2,8 @@ import { PointOption } from "./PointOption";
 
 /** 読み込み時にonEnter判定のオプションです */
 export type InitOnCallOption = {
-  /** onEnterの判定範囲です。endTriggerは位置がstart判定からend判定の場合にコールバックを呼びます。allの場合はstart判定を超えていたら呼びます */
-  range: "endTrigger" | "all";
+  /** onEnterの判定範囲です。endは位置がstart判定からend判定の場合にコールバックを呼びます。allの場合はstart判定を超えていたら呼びます */
+  range: "end" | "all";
 };
 
 /** 交差時に呼ばれるコールバック関数です */

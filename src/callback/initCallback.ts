@@ -60,12 +60,7 @@ export const initCallback = ({
   }
 
   // 判定範囲がendまでの場合
-  if (
-    range === "endTrigger" &&
-    endTargetPx &&
-    endViewPortPx &&
-    isOverStartLine
-  ) {
+  if (range === "end" && endTargetPx && endViewPortPx && isOverStartLine) {
     // 終了位置を過ぎているか
     const isOverEndLine =
       entries[0].boundingClientRect.top +
