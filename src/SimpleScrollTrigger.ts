@@ -46,6 +46,7 @@ export class SimpleScrollTrigger {
 
   #lastStartCalled: "onEnter" | "onLeaveBack" | null = null;
   #lastEndCalled: "onLeave" | "onEnterBack" | null = null;
+  
   constructor({
     trigger,
     onEnter,

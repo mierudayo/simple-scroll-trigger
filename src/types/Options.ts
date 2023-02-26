@@ -35,5 +35,6 @@ export type Options = {
   once?: boolean;
   /** 読み込み時にonEnter判定をするか */
   initOnEnter?: InitOnCallOption | boolean;
+  /** 読み込み時にonLeave判定をするか */
   initOnLeave?: boolean;
 };
